@@ -1,0 +1,5 @@
+xcelium.d/
+xrun.history
+xrun.log
+sim/logs/
+*.log
