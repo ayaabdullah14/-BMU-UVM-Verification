@@ -7,7 +7,6 @@ class bmu_seq_item extends uvm_sequence_item;
   rand rtl_pkg::rtl_alu_pkt_t ap;
   rand logic                 csr_ren_in;
 
-  // Operand signedness matches the DUT interface.
   rand logic        [31:0] a_in;
   rand logic        [31:0] b_in;
   rand logic        [31:0] csr_rddata_in;
