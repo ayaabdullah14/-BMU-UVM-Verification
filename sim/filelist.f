@@ -12,7 +12,6 @@
 ../rtl/rtl_lib.sv
 ../rtl/Bit_Manipulation_Unit.sv
 
-../tb/top/bmu_if.sv
 ../tb/bmu_pkg.sv
+../tb/top/bmu_if.sv
 ../tb/top/bmu_tb_top.sv
-
