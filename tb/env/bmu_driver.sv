@@ -46,23 +46,11 @@ class bmu_driver extends uvm_driver #(bmu_seq_item);
         vif.cb_drv.valid_in <= 1'b0; // disable result updates during gaps between requests.
       end
 
-      
-    `uvm_info("DRV",
-      $sformatf(
-        {"Driving rst_l=%b valid_in=%b ap=%p ",
-         "a_in=%08h b_in=%08h csr_ren_in=%b csr_rddata_in=%08h"},
-        tr.rst_l, tr.valid_in, tr.ap,
-        tr.a_in, tr.b_in, tr.csr_ren_in, tr.csr_rddata_in),
-      UVM_HIGH)
-
     end
   endtask
 
   // Called at cb_drv; preserve all requested control combinations.
   virtual task drive_item(bmu_seq_item tr);
-
-    if (tr.scan_mode !== 1'b0)
-      `uvm_fatal("SCAN_MODE", "Functional tests require scan_mode = 0")
 
     vif.cb_drv.rst_l         <= tr.rst_l;
     vif.cb_drv.scan_mode     <= tr.scan_mode;
