@@ -18,6 +18,34 @@ class bmu_seq_item extends uvm_sequence_item;
   logic [31:0] result_ff;
   logic        error;
 
+
+  // Restrict random AP generation to the currently verified operations.
+// Operations outside the current scope remain zero.
+constraint c_ap_scope_only {
+
+  ap.clz        == 1'b0;
+  ap.siext_h    == 1'b0;
+  ap.min        == 1'b0;
+  ap.packu      == 1'b0;
+  ap.packh      == 1'b0;
+  ap.rol        == 1'b0;
+  ap.gorc       == 1'b0;
+  ap.bset       == 1'b0;
+  ap.bclr       == 1'b0;
+  ap.bext       == 1'b0;
+  ap.sh1add     == 1'b0;
+  ap.sh3add     == 1'b0;
+  ap.land       == 1'b0;
+  ap.sll        == 1'b0;
+  ap.beq        == 1'b0;
+  ap.bne        == 1'b0;
+  ap.blt        == 1'b0;
+  ap.bge        == 1'b0;
+  ap.add        == 1'b0;
+  ap.jal        == 1'b0;
+  ap.predict_t  == 1'b0;
+  ap.predict_nt == 1'b0;
+  }
   // Factory registration and field automation.
   `uvm_object_utils_begin(bmu_seq_item)
     `uvm_field_int(rst_l,         UVM_DEFAULT)
