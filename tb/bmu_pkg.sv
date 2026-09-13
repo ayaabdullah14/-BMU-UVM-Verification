@@ -7,10 +7,10 @@ package bmu_pkg;
 
   `include "uvm_macros.svh"
 
-  // Must be first because all following classes use bmu_seq_item
+  // Sequence item must be first
   `include "env/bmu_seq_item.sv"
 
-  // Uses bmu_seq_item
+  // Reference model
   `include "reference_model/bmu_reference_model.sv"
 
   // Agent
@@ -24,15 +24,20 @@ package bmu_pkg;
   `include "env/bmu_coverage.sv"
   `include "env/bmu_env.sv"
 
- // Base sequence before derived sequence
+  // Sequences
   `include "sequences/bmu_base_sequence.sv"
   `include "sequences/bmu_smoke_sequence.sv"
-
-  // Base test must be before smoke test
+  `include "sequences/bmu_or_sequence.sv"
+  `include "sequences/bmu_orn_sequence.sv"
+  // Tests
   `include "tests/bmu_base_test.sv"
   `include "tests/bmu_smoke_test.sv"
 
   // Golden-vector test
   `include "tests/bmu_reference_model_unit_test.sv"
+
+  // OR test
+  `include "tests/bmu_or_test.sv"
+  `include "tests/bmu_orn_test.sv"
 
 endpackage
