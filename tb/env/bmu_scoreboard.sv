@@ -136,12 +136,16 @@ class bmu_scoreboard extends uvm_scoreboard;
         "BMU_RESULT_PASS",
         $sformatf(
           {"observe_cycle=%0d source_cycle=%0d operation=%s ",
-           "expected=0x%08h actual=0x%08h"},
+           "expected=0x%08h actual=0x%08h a=0x%08h b=0x%08h"},
           observed_cycle,
           expected_source_cycle,
           expected_operation,
           expected_result_ff,
-          tr.result_ff
+          tr.result_ff,
+          expected_source_a ,
+          expected_source_b
+
+
         ),
         UVM_MEDIUM
       )
@@ -398,33 +402,32 @@ class bmu_scoreboard extends uvm_scoreboard;
     total_checks   = result_check_count + error_check_count;
     total_passes   = result_pass_count  + error_pass_count;
     total_failures = result_fail_count  + error_fail_count;
-
-    `uvm_info(
-      "BMU_SB_SUMMARY",
-      $sformatf(
-        {"observed=%0d total_checks=%0d pass=%0d fail=%0d | ",
-         "result_checks=%0d result_pass=%0d result_fail=%0d | ",
-         "error_checks=%0d error_pass=%0d error_fail=%0d | ",
-         "valid_requests=%0d nop_requests=%0d hold_requests=%0d ",
-         "resets=%0d skipped=%0d"},
-        observed_count,
-        total_checks,
-        total_passes,
-        total_failures,
-        result_check_count,
-        result_pass_count,
-        result_fail_count,
-        error_check_count,
-        error_pass_count,
-        error_fail_count,
-        valid_request_count,
-        nop_request_count,
-        hold_request_count,
-        reset_count,
-        skipped_prediction_count
-      ),
-      UVM_NONE
-    )
+`uvm_info(
+  "BMU_SB_SUMMARY",
+  $sformatf(
+    {"observed=%0d total_checks=%0d pass=%0d fail=%0d | ",
+     "result_checks=%0d result_pass=%0d result_fail=%0d | ",
+     "error_checks=%0d error_pass=%0d error_fail=%0d | ",
+     "valid_requests=%0d nop_requests=%0d hold_requests=%0d ",
+     "resets=%0d skipped=%0d"},
+    observed_count,
+    total_checks,
+    total_passes,
+    total_failures,
+    result_check_count,
+    result_pass_count,
+    result_fail_count,
+    error_check_count,
+    error_pass_count,
+    error_fail_count,
+    valid_request_count,
+    nop_request_count,
+    hold_request_count,
+    reset_count,
+    skipped_prediction_count
+  ),
+  UVM_NONE
+)
   endfunction
 
 endclass
