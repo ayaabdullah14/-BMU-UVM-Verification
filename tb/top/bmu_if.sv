@@ -5,9 +5,9 @@ interface bmu_if(input logic clk);
   timeprecision 1ps;
 
   // DUT controls
-  logic rst_l;      // Active-low synchronous reset
-  logic scan_mode;  // Scan mode control
-  logic valid_in;   // Enables result register updates
+  logic rst_l;      
+  logic scan_mode;  
+  logic valid_in; 
 
   rtl_pkg::rtl_alu_pkt_t ap;  // Decoded operation controls
 
