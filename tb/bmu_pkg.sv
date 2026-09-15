@@ -31,6 +31,8 @@ package bmu_pkg;
   `include "sequences/bmu_orn_sequence.sv"
   `include "sequences/bmu_xor_sequence.sv"
   `include "sequences/bmu_xnor_sequence.sv"
+  `include "sequences/bmu_srl_sequence.sv"
+   `include "sequences/bmu_sra_sequence.sv"
   // Tests
   `include "tests/bmu_base_test.sv"
   `include "tests/bmu_smoke_test.sv"
@@ -43,5 +45,7 @@ package bmu_pkg;
   `include "tests/bmu_orn_test.sv"
   `include "tests/bmu_xor_test.sv"
   `include "tests/bmu_xnor_test.sv"
+  `include "tests/bmu_srl_test.sv"
+  `include "tests/bmu_sra_test.sv"
 
 endpackage
