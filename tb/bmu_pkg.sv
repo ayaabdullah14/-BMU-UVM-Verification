@@ -32,7 +32,13 @@ package bmu_pkg;
   `include "sequences/bmu_xor_sequence.sv"
   `include "sequences/bmu_xnor_sequence.sv"
   `include "sequences/bmu_srl_sequence.sv"
-   `include "sequences/bmu_sra_sequence.sv"
+  `include "sequences/bmu_sra_sequence.sv"
+  `include "sequences/bmu_ror_sequence.sv"
+  `include "sequences/bmu_binv_sequence.sv"
+  `include "sequences/bmu_sh2add_sequence.sv"
+  `include "sequences/bmu_sub_sequence.sv"
+
+
   // Tests
   `include "tests/bmu_base_test.sv"
   `include "tests/bmu_smoke_test.sv"
@@ -40,12 +46,16 @@ package bmu_pkg;
   // Golden-vector test
   `include "tests/bmu_reference_model_unit_test.sv"
 
-  // OR test
+  
   `include "tests/bmu_or_test.sv"
   `include "tests/bmu_orn_test.sv"
   `include "tests/bmu_xor_test.sv"
   `include "tests/bmu_xnor_test.sv"
   `include "tests/bmu_srl_test.sv"
   `include "tests/bmu_sra_test.sv"
+  `include "tests/bmu_ror_test.sv"
+  `include "tests/bmu_binv_test.sv"
+  `include "tests/bmu_sh2add_test.sv"
+  `include "tests/bmu_sub_test.sv"
 
 endpackage
