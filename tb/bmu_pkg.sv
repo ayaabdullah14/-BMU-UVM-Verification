@@ -37,6 +37,12 @@ package bmu_pkg;
   `include "sequences/bmu_binv_sequence.sv"
   `include "sequences/bmu_sh2add_sequence.sv"
   `include "sequences/bmu_sub_sequence.sv"
+  `include "sequences/bmu_sltu_sequence.sv"
+  `include "sequences/bmu_slt_sequence.sv"
+  `include "sequences/bmu_ctz_sequence.sv"
+  `include "sequences/bmu_ctz_debug_sequence.sv"
+  `include "sequences/bmu_cpop_sequence.sv"
+  `include "sequences/bmu_sext_b_sequence.sv"
 
 
   // Tests
@@ -57,5 +63,11 @@ package bmu_pkg;
   `include "tests/bmu_binv_test.sv"
   `include "tests/bmu_sh2add_test.sv"
   `include "tests/bmu_sub_test.sv"
+  `include "tests/bmu_sltu_test.sv"
+  `include "tests/bmu_slt_test.sv"
+  `include "tests/bmu_ctz_test.sv"
+  `include "tests/bmu_ctz_debug_test.sv"
+  `include "tests/bmu_cpop_test.sv"
+  `include "tests/bmu_sext_b_test.sv"
 
 endpackage
