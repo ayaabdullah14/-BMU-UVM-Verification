@@ -1,0 +1,86 @@
+#e1(13Sep2026:01:18:42): source ./xcelium.d/env.d/env.history.13Sep2026_01_18_42
+s1(13Sep2026:01:18:42):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_orn_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_orn_test.log 
+#e2(13Sep2026:09:37:40): source ./xcelium.d/env.d/env.history.13Sep2026_09_37_40
+s2(13Sep2026:09:37:40):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=/bmu_orn_test.sv +UVM_VERBOSITY=UVM_MEDIUM -l logs//bmu_orn_test.sv.log 
+#e3(13Sep2026:10:31:33): source ./xcelium.d/env.d/env.history.13Sep2026_10_31_33
+s3(13Sep2026:10:31:33):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=/bmu_orn_test.sv +UVM_VERBOSITY=UVM_MEDIUM -l logs//bmu_orn_test.sv.log 
+#e4(13Sep2026:10:34:25): source ./xcelium.d/env.d/env.history.13Sep2026_10_34_25
+s4(13Sep2026:10:34:25):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=/bmu_orn_test.sv +UVM_VERBOSITY=UVM_MEDIUM -l logs//bmu_orn_test.sv.log 
+#e5(13Sep2026:10:35:12): source ./xcelium.d/env.d/env.history.13Sep2026_10_35_12
+s5(13Sep2026:10:35:12):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_orn_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_orn_test.log 
+#e6(13Sep2026:11:36:19): source ./xcelium.d/env.d/env.history.13Sep2026_11_36_19
+s6(13Sep2026:11:36:19):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xor_test.log 
+#e7(13Sep2026:11:40:22): source ./xcelium.d/env.d/env.history.13Sep2026_11_40_22
+s7(13Sep2026:11:40:22):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xor_test.log 
+#e8(14Sep2026:23:32:00): source ./xcelium.d/env.d/env.history.14Sep2026_23_32_00
+s8(14Sep2026:23:32:00):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xor_test.log 
+#e9(15Sep2026:01:06:53): source ./xcelium.d/env.d/env.history.15Sep2026_01_06_53
+s9(15Sep2026:01:06:53):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xnor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xnor_test.log 
+#e10(15Sep2026:01:07:53): source ./xcelium.d/env.d/env.history.15Sep2026_01_07_53
+s10(15Sep2026:01:07:53):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xnor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xnor_test.log 
+#e11(15Sep2026:01:11:09): source ./xcelium.d/env.d/env.history.15Sep2026_01_11_09
+s11(15Sep2026:01:11:09):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xnor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xnor_test.log 
+#e12(15Sep2026:01:16:40): source ./xcelium.d/env.d/env.history.15Sep2026_01_16_40
+s12(15Sep2026:01:16:40):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xnor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xnor_test.log 
+#e13(15Sep2026:01:18:17): source ./xcelium.d/env.d/env.history.15Sep2026_01_18_17
+s13(15Sep2026:01:18:17):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xnor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xnor_test.log 
+#e14(15Sep2026:01:19:14): source ./xcelium.d/env.d/env.history.15Sep2026_01_19_14
+s14(15Sep2026:01:19:14):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xnor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xnor_test.log 
+#e15(15Sep2026:01:27:50): source ./xcelium.d/env.d/env.history.15Sep2026_01_27_50
+s15(15Sep2026:01:27:50):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_xnor_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_xnor_test.log 
+#e16(15Sep2026:20:29:37): source ./xcelium.d/env.d/env.history.15Sep2026_20_29_37
+s16(15Sep2026:20:29:37):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_srl_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_srl_test.log 
+#e17(15Sep2026:20:34:28): source ./xcelium.d/env.d/env.history.15Sep2026_20_34_28
+s17(15Sep2026:20:34:28):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_srl_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_srl_test.log 
+#e18(16Sep2026:00:16:48): source ./xcelium.d/env.d/env.history.16Sep2026_00_16_48
+s18(16Sep2026:00:16:48):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_srl_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_srl_test.log 
+#e19(16Sep2026:00:17:19): source ./xcelium.d/env.d/env.history.16Sep2026_00_17_19
+s19(16Sep2026:00:17:19):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_sra_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_sra_test.log 
+#e20(16Sep2026:00:24:17): source ./xcelium.d/env.d/env.history.16Sep2026_00_24_17
+s20(16Sep2026:00:24:17):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_srl_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_srl_test.log 
+#e21(16Sep2026:00:24:26): source ./xcelium.d/env.d/env.history.16Sep2026_00_24_26
+s21(16Sep2026:00:24:26):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_sra_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_sra_test.log 
+#e22(16Sep2026:01:03:22): source ./xcelium.d/env.d/env.history.16Sep2026_01_03_22
+s22(16Sep2026:01:03:22):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_ror_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_ror_test.log 
+#e23(16Sep2026:01:51:58): source ./xcelium.d/env.d/env.history.16Sep2026_01_51_58
+s23(16Sep2026:01:51:58):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_binv_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_binv_test.log 
+#e24(16Sep2026:02:08:07): source ./xcelium.d/env.d/env.history.16Sep2026_02_08_07
+s24(16Sep2026:02:08:07):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_sh2add_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_sh2add_test.log 
+#e25(16Sep2026:12:58:43): source ./xcelium.d/env.d/env.history.16Sep2026_12_58_43
+s25(16Sep2026:12:58:43):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_sub_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_sub_test.log 
+#e26(16Sep2026:14:50:48): source ./xcelium.d/env.d/env.history.16Sep2026_14_50_48
+s26(16Sep2026:14:50:48):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_sltu_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_sltu_test.log 
+#e27(16Sep2026:15:52:07): source ./xcelium.d/env.d/env.history.16Sep2026_15_52_07
+s27(16Sep2026:15:52:07):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_slt_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_slt_test.log 
+#e28(16Sep2026:15:53:21): source ./xcelium.d/env.d/env.history.16Sep2026_15_53_21
+s28(16Sep2026:15:53:21):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_slt_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_slt_test.log 
+#e29(16Sep2026:16:41:36): source ./xcelium.d/env.d/env.history.16Sep2026_16_41_36
+s29(16Sep2026:16:41:36):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_ctz_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_ctz_test.log 
+#e30(16Sep2026:16:42:26): source ./xcelium.d/env.d/env.history.16Sep2026_16_42_26
+s30(16Sep2026:16:42:26):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_ctz_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_ctz_test.log 
+#e31(16Sep2026:16:43:08): source ./xcelium.d/env.d/env.history.16Sep2026_16_43_08
+s31(16Sep2026:16:43:08):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_ctz_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_ctz_test.log 
+#e32(16Sep2026:16:44:21): source ./xcelium.d/env.d/env.history.16Sep2026_16_44_21
+s32(16Sep2026:16:44:21):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_ctz_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_ctz_test.log 
+#e33(16Sep2026:16:46:07): source ./xcelium.d/env.d/env.history.16Sep2026_16_46_07
+s33(16Sep2026:16:46:07):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_ctz_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_ctz_test.log 
+#e34(16Sep2026:18:00:57): source ./xcelium.d/env.d/env.history.16Sep2026_18_00_57
+s34(16Sep2026:18:00:57):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_ctz_debug_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_ctz_debug_test.log 
+#e35(16Sep2026:20:00:08): source ./xcelium.d/env.d/env.history.16Sep2026_20_00_08
+s35(16Sep2026:20:00:08):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_cpop_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_cpop_test.log 
+#e36(16Sep2026:20:28:22): source ./xcelium.d/env.d/env.history.16Sep2026_20_28_22
+s36(16Sep2026:20:28:22):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_sext_b_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_sext_b_test.log 
+#e37(17Sep2026:12:50:55): source ./xcelium.d/env.d/env.history.17Sep2026_12_50_55
+s37(17Sep2026:12:50:55):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_max_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_max_test.log 
+#e38(17Sep2026:13:15:08): source ./xcelium.d/env.d/env.history.17Sep2026_13_15_08
+s38(17Sep2026:13:15:08):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_pack_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_pack_test.log 
+#e39(17Sep2026:17:27:16): source ./xcelium.d/env.d/env.history.17Sep2026_17_27_16
+s39(17Sep2026:17:27:16):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_grev_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_grev_test.log 
+#e40(17Sep2026:17:58:13): source ./xcelium.d/env.d/env.history.17Sep2026_17_58_13
+s40(17Sep2026:17:58:13):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_csr_read_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_csr_read_test.log 
+#e41(17Sep2026:18:11:40): source ./xcelium.d/env.d/env.history.17Sep2026_18_11_40
+s41(17Sep2026:18:11:40):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_csr_write_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_csr_write_test.log 
+#e42(17Sep2026:18:50:10): source ./xcelium.d/env.d/env.history.17Sep2026_18_50_10
+s42(17Sep2026:18:50:10):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=bmu_error_test +UVM_VERBOSITY=UVM_MEDIUM -l logs/bmu_error_test.log 
+#e43(17Sep2026:19:42:11): source ./xcelium.d/env.d/env.history.17Sep2026_19_42_11
+s43(17Sep2026:19:42:11):  xrun -64bit -sv -uvm -timescale 1ns/1ps -f filelist.f -top bmu_tb_top +UVM_TESTNAME=../tb/tests/bmu_error_test.sv +UVM_VERBOSITY=UVM_MEDIUM -l logs/../tb/tests/bmu_error_test.sv.log 
