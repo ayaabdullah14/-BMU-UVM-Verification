@@ -3,7 +3,7 @@ class bmu_env extends uvm_env;
 
   bmu_agent      agent;
   bmu_scoreboard scoreboard;
-  bmu_coverage   coverage;
+  bmu_subscriber   coverage;
 
   function new( string name = "bmu_env",    uvm_component parent = null  );
     super.new(name, parent);
@@ -15,7 +15,7 @@ class bmu_env extends uvm_env;
 
     agent = bmu_agent::type_id::create("agent", this); 
     scoreboard = bmu_scoreboard::type_id::create("scoreboard",this); 
-    coverage = bmu_coverage::type_id::create("coverage",  this);
+    coverage = bmu_subscriber::type_id::create("subscriber",  this);
     
   endfunction
 
