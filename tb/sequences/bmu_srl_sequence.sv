@@ -290,7 +290,7 @@ task body();
 
   
 // ------------------------------Idle cycle--------------------------------
-    repeat (20) begin 
+    repeat (2) begin 
      start_item(req);
 
     req.rst_l = 1;
