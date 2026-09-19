@@ -43,7 +43,13 @@ class bmu_driver extends uvm_driver #(bmu_seq_item);
         seq_item_port.item_done(); // notify the sequencer that the item is complete.
       end
       else begin
-        vif.cb_drv.valid_in <= 1'b0; // disable result updates during gaps between requests.
+      vif.cb_drv.valid_in      <= 1'b0;
+      vif.cb_drv.ap            <= '0;
+      vif.cb_drv.csr_ren_in    <= 1'b0;
+      vif.cb_drv.csr_rddata_in <= '0;
+      vif.cb_drv.a_in          <= '0;
+      vif.cb_drv.b_in          <= '0;
+
       end
 
     end
