@@ -30,6 +30,14 @@ typedef enum int unsigned {
 } bmu_cov_op_e;
 
 
+// ============================================================================
+// BMU SPEC-DRIVEN FUNCTIONAL COVERAGE
+// Coverage measures whether required stimulus was exercised.
+// Scoreboard/assertions check result, error, reset, hold and one-cycle latency.
+// Equivalent visible behaviors are grouped; distinct boundaries and risks are
+// kept separate so a high percentage cannot hide a missing requirement.
+// ============================================================================
+
 typedef enum int unsigned {
   COV_REL_LT = 0,
   COV_REL_EQ,
@@ -38,17 +46,32 @@ typedef enum int unsigned {
 
 
 typedef enum int unsigned {
+  COV_UPPER_ZERO = 0,
+  COV_UPPER_NONZERO
+} bmu_cov_upper_e;
+
+
+typedef enum int unsigned {
+  COV_CSR_ZERO = 0,
+  COV_CSR_ONES,
+  COV_CSR_OTHER
+} bmu_cov_csr_data_e;
+
+
+typedef enum int unsigned {
+  COV_SHIFT_ZERO = 0,
+  COV_SHIFT_ONES,
+  COV_SHIFT_ONEHOT,
+  COV_SHIFT_OTHER
+} bmu_cov_shift_data_e;
+
+
+typedef enum int unsigned {
   COV_ERR_CSR_CONFLICT = 0,
   COV_ERR_SH2ADD_NO_ZBA,
   COV_ERR_SUB_WITH_ZBA,
-
-  COV_ERR_OR_EXTRA,
-  COV_ERR_XOR_EXTRA,
-  COV_ERR_SRL_EXTRA,
-  COV_ERR_SRA_EXTRA,
-  COV_ERR_ROR_EXTRA,
-  COV_ERR_BINV_EXTRA,
-  COV_ERR_GREV_EXTRA
+  COV_ERR_MULTI_OPERATION,
+  COV_ERR_EXTRA_FIELD
 } bmu_cov_error_e;
 
 
@@ -60,13 +83,13 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   `uvm_component_utils(bmu_subscriber)
 
-  // Only temporal state that is actually required by coverage.
-  bit          have_prev_valid;
-  bit          prev_valid_in;
-  bit          activity_seen;
-
-  bit          hold_active;
-  int unsigned hold_length;
+  // Retained only for documented ignored-input checks, where two requests
+  // must differ solely in an input that the operation is specified to ignore.
+  bit          prev_accepted_legal;
+  bit          prev_data_known;
+  bmu_cov_op_e prev_op;
+  logic [31:0] prev_a;
+  logic [31:0] prev_b;
 
 
   // ==========================================================================
@@ -145,13 +168,12 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
 
   // ==========================================================================
-  // 3. SHIFT / ROTATE AMOUNT CLASSES
+  // 3. SHIFT / ROTATE AMOUNTS
   //
   // Spec-visible behavior only: shift amount is b_in[4:0].
-  // We group values into useful boundaries/ranges rather than model internal
-  // barrel-shifter implementation stages.
-  //
-  // 3 operations x 7 classes = 21 cross bins.
+  // The spec defines b_in[4:0] as the amount. Coverage keeps the meaningful
+  // functional boundaries (no shift, half width, and maximum) while grouping
+  // ordinary interior values that do not represent separate requirements.
   // ==========================================================================
 
   covergroup cg_shift with function sample(
@@ -172,13 +194,11 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     cp_amount: coverpoint amount {
       option.weight = 0;
 
-      bins zero       = {5'd0};
-      bins one        = {5'd1};
-      bins low        = {[5'd2:5'd7]};
-      bins byte_mid   = {[5'd8:5'd15]};
-      bins half       = {5'd16};
-      bins high       = {[5'd17:5'd30]};
-      bins max        = {5'd31};
+      bins zero    = {5'd0};
+      bins low     = {[5'd1:5'd15]};
+      bins half    = {5'd16};
+      bins high    = {[5'd17:5'd30]};
+      bins maximum = {5'd31};
     }
 
     op_x_amount: cross cp_op, cp_amount;
@@ -202,8 +222,9 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   // ==========================================================================
   // 5. BINV
-  // Selected index classes + original target-bit value.
-  // No index x value Cartesian cross.
+  // End bits are true boundaries. Interior positions are grouped by lower and
+  // upper half so coverage does not require 32 nearly identical directed tests.
+  // Original target-bit value is covered separately; no Cartesian cross.
   // ==========================================================================
 
   covergroup cg_binv with function sample(
@@ -213,10 +234,10 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     option.per_instance = 1;
 
     cp_index: coverpoint index {
-      bins lsb            = {5'd0};
-      bins lower_half     = {[5'd1:5'd15]};
-      bins upper_half     = {[5'd16:5'd30]};
-      bins msb            = {5'd31};
+      bins lsb        = {5'd0};
+      bins lower_half = {[5'd1:5'd15]};
+      bins upper_half = {[5'd16:5'd30]};
+      bins msb        = {5'd31};
     }
 
     cp_original: coverpoint original_bit {
@@ -228,36 +249,73 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   // ==========================================================================
   // 6. COMPARISON COVERAGE
-  //
-  // 3 operations x relation {LT,EQ,GT} = 9 bins
-  // + focused mixed-sign observations = 3 bins.
+  // Reachable operation x sign-pair x relation combinations only.
   // ==========================================================================
 
   covergroup cg_compare with function sample(int unsigned code);
     option.per_instance = 1;
 
     cp_case: coverpoint code {
-      bins slt_lt   = {0};
-      bins slt_eq   = {1};
-      bins slt_gt   = {2};
+      bins reachable[] = {[0:35]};
+      ignore_bins impossible = {
+        3, 4, 7, 8,
+        16, 17, 18, 19,
+        27, 28, 31, 32
+      };
+    }
+  endgroup
 
-      bins sltu_lt  = {3};
-      bins sltu_eq  = {4};
-      bins sltu_gt  = {5};
 
-      bins max_lt   = {6};
-      bins max_eq   = {7};
-      bins max_gt   = {8};
+  // Representative A classes for each shift/rotate operation.
+  covergroup cg_shift_data with function sample(
+    bmu_cov_op_e op,
+    bmu_cov_shift_data_e data_class
+  );
+    option.per_instance = 1;
 
-      bins signed_a_neg_b_pos = {9};
-      bins signed_a_pos_b_neg = {10};
-      bins unsigned_mixed_sign = {11};
+    cp_op: coverpoint op {
+      option.weight = 0;
+      bins ops[] = {COV_OP_SRL, COV_OP_SRA, COV_OP_ROR};
+    }
+
+    cp_data: coverpoint data_class {
+      option.weight = 0;
+    }
+
+    op_x_data: cross cp_op, cp_data;
+  endgroup
+
+
+  // ==========================================================================
+  // 7. SUB / SH2ADD ARITHMETIC RISKS
+  // ==========================================================================
+
+  covergroup cg_sub with function sample(int unsigned code);
+    option.per_instance = 1;
+
+    cp_case: coverpoint code {
+      bins equal                    = {0};
+      bins borrow_no_overflow       = {1};
+      bins borrow_with_overflow     = {2};
+      bins no_borrow_no_overflow    = {3};
+      bins no_borrow_with_overflow  = {4};
+    }
+  endgroup
+
+
+  covergroup cg_sh2add with function sample(int unsigned code);
+    option.per_instance = 1;
+
+    cp_case: coverpoint code {
+      bins normal_no_carry     = {0};
+      bins addition_carry      = {1};
+      bins upper_bits_shifted  = {2};
     }
   endgroup
 
 
   // ==========================================================================
-  // 7. CTZ
+  // 8. CTZ
   //
   // Exact 0..32 is justified:
   //   0..31 = first-set-bit position
@@ -274,7 +332,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
 
   // ==========================================================================
-  // 8. CPOP COUNT
+  // 9. CPOP COUNT
   // Semantic count ranges, not all values as separate closure targets.
   // ==========================================================================
 
@@ -294,7 +352,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
 
   // ==========================================================================
-  // 9. CPOP SOURCE REGION
+  // 10. CPOP SOURCE REGION
   //
   // For one-hot inputs, prove that all four byte regions participate in the
   // 32-bit population count. This is enough to catch partial-width counting
@@ -314,10 +372,13 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
 
   // ==========================================================================
-  // 10. SEXT.B
+  // 11. SEXT.B
   // ==========================================================================
 
-  covergroup cg_sext_b with function sample(logic [7:0] byte_value);
+  covergroup cg_sext_b with function sample(
+    logic [7:0] byte_value,
+    bmu_cov_upper_e upper_class
+  );
     option.per_instance = 1;
 
     cp_byte: coverpoint byte_value {
@@ -328,28 +389,39 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
       bins other_positive = {[8'h01:8'h7e]};
       bins other_negative = {[8'h81:8'hfe]};
     }
+
+    cp_sign: coverpoint byte_value[7] {
+      option.weight = 0;
+      bins positive = {0};
+      bins negative = {1};
+    }
+
+    cp_upper: coverpoint upper_class {
+      option.weight = 0;
+    }
+
+    sign_x_upper: cross cp_sign, cp_upper;
   endgroup
 
 
   // ==========================================================================
-  // 11. PACK
-  //
-  // Operation coverage already proves PACK was selected.
-  // This single bin only proves the test used distinguishable low halfwords,
-  // so an A/B lane swap would be observable by the scoreboard.
+  // 12. PACK
+  // Small semantic classes. No 16-bit Cartesian data sweep.
   // ==========================================================================
 
-  covergroup cg_pack with function sample(bit asymmetric_low_halves);
+  covergroup cg_pack with function sample(int unsigned code);
     option.per_instance = 1;
 
-    cp_case: coverpoint asymmetric_low_halves {
-      bins distinguishable_sources = {1};
+    cp_case: coverpoint code {
+      bins both_zero = {0};
+      bins both_ones = {1};
+      bins other     = {2};
     }
   endgroup
 
 
   // ==========================================================================
-  // 12. GREV / REV8
+  // 13. GREV / REV8
   //
   // Supported mode: 24.
   // All other low-5-bit values are the same unsupported class.
@@ -366,7 +438,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
 
   // ==========================================================================
-  // 13. CSR SOURCE DISCRIMINATION
+  // 14. CSR SOURCE DISCRIMINATION AND SELECTED-DATA CLASSES
   //
   // Operation coverage proves READ / WRITE-A / WRITE-B were selected.
   // These bins prove the selected source was distinguishable from alternatives,
@@ -384,8 +456,31 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
   endgroup
 
 
+  covergroup cg_csr_data with function sample(
+    bmu_cov_op_e path,
+    bmu_cov_csr_data_e data_class
+  );
+    option.per_instance = 1;
+
+    cp_path: coverpoint path {
+      option.weight = 0;
+      bins paths[] = {
+        COV_OP_CSR_READ,
+        COV_OP_CSR_WRITE_A,
+        COV_OP_CSR_WRITE_B
+      };
+    }
+
+    cp_data: coverpoint data_class {
+      option.weight = 0;
+    }
+
+    path_x_data: cross cp_path, cp_data;
+  endgroup
+
+
   // ==========================================================================
-  // 14. ERROR REASONS
+  // 15. ERROR REASONS
   //
   // These are stimulus-intent bins only.
   // The scoreboard checks the actual DUT error/result behavior.
@@ -399,21 +494,15 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
         COV_ERR_CSR_CONFLICT,
         COV_ERR_SH2ADD_NO_ZBA,
         COV_ERR_SUB_WITH_ZBA,
-
-        COV_ERR_OR_EXTRA,
-        COV_ERR_XOR_EXTRA,
-        COV_ERR_SRL_EXTRA,
-        COV_ERR_SRA_EXTRA,
-        COV_ERR_ROR_EXTRA,
-        COV_ERR_BINV_EXTRA,
-        COV_ERR_GREV_EXTRA
+        COV_ERR_MULTI_OPERATION,
+        COV_ERR_EXTRA_FIELD
       };
     }
   endgroup
 
 
   // ==========================================================================
-  // 15. ERROR vs valid_in
+  // 16. ERROR vs valid_in
   //
   // Trainer clarification: error detection is independent of valid_in.
   // We only need to prove error stimulus was exercised with valid low and high;
@@ -431,52 +520,25 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
 
   // ==========================================================================
-  // 16. valid_in TRANSITIONS
+  // 17. IGNORED INPUTS
+  // One paired observation per documented ignored-input dependency.
   // ==========================================================================
 
-  covergroup cg_valid_transition with function sample(logic [1:0] transition);
+  covergroup cg_ignored_input with function sample(int unsigned code);
     option.per_instance = 1;
 
-    cp_transition: coverpoint transition {
-      bins t00 = {2'b00};
-      bins t01 = {2'b01};
-      bins t10 = {2'b10};
-      bins t11 = {2'b11};
-    }
-  endgroup
-
-
-  // ==========================================================================
-  // 17. RESULT-HOLD LENGTH CLASS
-  //
-  // valid_in=0 must hold result_ff.
-  // One-cycle and multi-cycle hold are the only distinct temporal classes
-  // needed for functional coverage.
-  // ==========================================================================
-
-  covergroup cg_hold with function sample(int unsigned length);
-    option.per_instance = 1;
-
-    cp_length: coverpoint length {
-      bins single_cycle = {1};
-      bins multi_cycle  = {[2:$]};
-    }
-  endgroup
-
-
-  // ==========================================================================
-  // 18. RESET CONTEXT
-  //
-  // Reset correctness itself is checked by scoreboard/assertions.
-  // Coverage only proves reset was exercised at startup and after activity.
-  // ==========================================================================
-
-  covergroup cg_reset with function sample(bit after_activity);
-    option.per_instance = 1;
-
-    cp_context: coverpoint after_activity {
-      bins startup   = {0};
-      bins midstream = {1};
+    cp_case: coverpoint code {
+      bins srl_upper_b       = {0};
+      bins sra_upper_b       = {1};
+      bins ror_upper_b       = {2};
+      bins binv_upper_b      = {3};
+      bins grev_upper_b      = {4};
+      bins ctz_b             = {5};
+      bins cpop_b            = {6};
+      bins sext_b_b          = {7};
+      bins sext_b_upper_a    = {8};
+      bins pack_upper_a      = {9};
+      bins pack_upper_b      = {10};
     }
   endgroup
 
@@ -495,8 +557,11 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     cg_logic            = new();
     cg_shift            = new();
     cg_sra_sign         = new();
+    cg_shift_data       = new();
     cg_binv             = new();
     cg_compare          = new();
+    cg_sub              = new();
+    cg_sh2add           = new();
     cg_ctz              = new();
     cg_cpop_count       = new();
     cg_cpop_region      = new();
@@ -504,18 +569,14 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     cg_pack             = new();
     cg_grev             = new();
     cg_csr_source       = new();
+    cg_csr_data         = new();
     cg_error_reason     = new();
     cg_error_valid      = new();
-    cg_valid_transition = new();
-    cg_hold             = new();
-    cg_reset            = new();
+    cg_ignored_input    = new();
 
-    have_prev_valid = 0;
-    prev_valid_in   = 0;
-    activity_seen   = 0;
-
-    hold_active = 0;
-    hold_length = 0;
+    prev_accepted_legal = 0;
+    prev_data_known     = 0;
+    prev_op             = COV_OP_NONE;
   endfunction
 
 
@@ -549,6 +610,48 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
       tr.ap.pack    ||
       tr.ap.grev
     );
+  endfunction
+
+
+  function automatic int unsigned primary_count(bmu_seq_item tr);
+    return $countones({
+      tr.ap.lor,
+      tr.ap.lxor,
+      tr.ap.srl,
+      tr.ap.sra,
+      tr.ap.ror,
+      tr.ap.binv,
+      tr.ap.sh2add,
+      tr.ap.sub,
+      tr.ap.slt,
+      tr.ap.ctz,
+      tr.ap.cpop,
+      tr.ap.siext_b,
+      tr.ap.max,
+      tr.ap.pack,
+      tr.ap.grev
+    });
+  endfunction
+
+
+  // Checks whether the primary-operation bits match one documented recipe.
+  // Other AP bits are intentionally ignored here so an otherwise legal
+  // primary recipe with an extra field can be classified separately.
+  function automatic bit matches_legal_primary_recipe(bmu_seq_item tr);
+    int unsigned n;
+
+    n = primary_count(tr);
+
+    if (tr.ap.slt && tr.ap.sub && (n == 2))
+      return 1;
+
+    if (tr.ap.max && tr.ap.sub && (n == 2))
+      return 1;
+
+    if ((n == 1) && has_bmu_primary(tr))
+      return 1;
+
+    return 0;
   endfunction
 
 
@@ -677,7 +780,9 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     end
 
     // SH2ADD requires zba.
-    if (tr.ap.sh2add && !tr.ap.zba) begin
+    if (tr.ap.sh2add &&
+        (primary_count(tr) == 1) &&
+        !tr.ap.zba) begin
       reason = COV_ERR_SH2ADD_NO_ZBA;
       return 1;
     end
@@ -685,9 +790,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     // Standalone SUB forbids zba.
     if (tr.ap.sub &&
         tr.ap.zba &&
-        !tr.ap.sh2add &&
-        !tr.ap.slt &&
-        !tr.ap.max) begin
+        (primary_count(tr) == 1)) begin
       reason = COV_ERR_SUB_WITH_ZBA;
       return 1;
     end
@@ -697,44 +800,26 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     if (is_unsupported_grev(tr))
       return 0;
 
+    // CSR-write collisions are still undocumented in the verification plan.
+    // Do not guess their error behavior until that clarification is closed.
+    if (has_bmu_primary(tr) &&
+        (tr.ap.csr_write || tr.ap.csr_imm))
+      return 0;
+
     op = decode_legal_op(tr);
 
     // Trainer-corrected extra-field conflicts.
-    // These are sampled only when the request is not a clean legal recipe.
+    // An invalid multi-primary request cannot be assigned reliably to one
+    // operation name, so coverage records the conflict type instead.
     if (!tr.csr_ren_in && (op == COV_OP_NONE)) begin
 
-      if (tr.ap.lor) begin
-        reason = COV_ERR_OR_EXTRA;
+      if (matches_legal_primary_recipe(tr)) begin
+        reason = COV_ERR_EXTRA_FIELD;
         return 1;
       end
 
-      if (tr.ap.lxor) begin
-        reason = COV_ERR_XOR_EXTRA;
-        return 1;
-      end
-
-      if (tr.ap.srl) begin
-        reason = COV_ERR_SRL_EXTRA;
-        return 1;
-      end
-
-      if (tr.ap.sra) begin
-        reason = COV_ERR_SRA_EXTRA;
-        return 1;
-      end
-
-      if (tr.ap.ror) begin
-        reason = COV_ERR_ROR_EXTRA;
-        return 1;
-      end
-
-      if (tr.ap.binv) begin
-        reason = COV_ERR_BINV_EXTRA;
-        return 1;
-      end
-
-      if (tr.ap.grev) begin
-        reason = COV_ERR_GREV_EXTRA;
+      if (primary_count(tr) > 1) begin
+        reason = COV_ERR_MULTI_OPERATION;
         return 1;
       end
 
@@ -795,6 +880,41 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
   endfunction
 
 
+  function automatic bmu_cov_upper_e upper24_class(logic [23:0] value);
+    if (value == 24'h000000)
+      return COV_UPPER_ZERO;
+
+    return COV_UPPER_NONZERO;
+  endfunction
+
+
+  function automatic bmu_cov_csr_data_e csr_data_class(logic [31:0] value);
+    if (value == 32'h00000000)
+      return COV_CSR_ZERO;
+
+    if (value == 32'hffffffff)
+      return COV_CSR_ONES;
+
+    return COV_CSR_OTHER;
+  endfunction
+
+
+  function automatic bmu_cov_shift_data_e shift_data_class(
+    logic [31:0] value
+  );
+    if (value == 32'h00000000)
+      return COV_SHIFT_ZERO;
+
+    if (value == 32'hffffffff)
+      return COV_SHIFT_ONES;
+
+    if ($onehot(value))
+      return COV_SHIFT_ONEHOT;
+
+    return COV_SHIFT_OTHER;
+  endfunction
+
+
   function automatic bit required_data_known(
     bmu_seq_item tr,
     bmu_cov_op_e op
@@ -817,15 +937,6 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
   endfunction
 
 
-  function void close_hold_run();
-    if (hold_active && (hold_length > 0))
-      cg_hold.sample(hold_length);
-
-    hold_active = 0;
-    hold_length = 0;
-  endfunction
-
-
   // ==========================================================================
   // OPERATION-SPECIFIC SAMPLING
   // ==========================================================================
@@ -835,9 +946,13 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     bmu_cov_op_e op
   );
     bmu_cov_relation_e relation;
+    logic [32:0] sub_wide;
+    logic [33:0] sh2_wide;
+    logic [31:0] csr_data;
     int unsigned code;
     int unsigned count_value;
     int bit_index;
+    bit overflow;
 
 
     // ------------------------------------------------------------------------
@@ -866,6 +981,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
         }) begin
 
       cg_shift.sample(op, tr.b_in[4:0]);
+      cg_shift_data.sample(op, shift_data_class(tr.a_in));
 
       // Amount 0 does not exercise arithmetic sign extension.
       if ((op == COV_OP_SRA) &&
@@ -892,14 +1008,8 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     if (op == COV_OP_SLT) begin
 
       relation = signed_relation(tr.a_in, tr.b_in);
-      cg_compare.sample(0 + relation);
-
-      if (tr.a_in[31] != tr.b_in[31]) begin
-        if (tr.a_in[31])
-          cg_compare.sample(9);
-        else
-          cg_compare.sample(10);
-      end
+      code = ({tr.a_in[31], tr.b_in[31]} * 3) + relation;
+      cg_compare.sample(code);
 
     end
 
@@ -907,10 +1017,8 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     else if (op == COV_OP_SLTU) begin
 
       relation = unsigned_relation(tr.a_in, tr.b_in);
-      cg_compare.sample(3 + relation);
-
-      if (tr.a_in[31] != tr.b_in[31])
-        cg_compare.sample(11);
+      code = 12 + ({tr.a_in[31], tr.b_in[31]} * 3) + relation;
+      cg_compare.sample(code);
 
     end
 
@@ -918,15 +1026,44 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     else if (op == COV_OP_MAX) begin
 
       relation = signed_relation(tr.a_in, tr.b_in);
-      cg_compare.sample(6 + relation);
+      code = 24 + ({tr.a_in[31], tr.b_in[31]} * 3) + relation;
+      cg_compare.sample(code);
 
-      if (tr.a_in[31] != tr.b_in[31]) begin
-        if (tr.a_in[31])
-          cg_compare.sample(9);
-        else
-          cg_compare.sample(10);
-      end
+    end
 
+
+    // ------------------------------------------------------------------------
+    // SUB
+    // ------------------------------------------------------------------------
+    if (op == COV_OP_SUB) begin
+      relation = unsigned_relation(tr.a_in, tr.b_in);
+      sub_wide = {1'b0, tr.a_in} - {1'b0, tr.b_in};
+      overflow = (tr.a_in[31] != tr.b_in[31]) &&
+                 (sub_wide[31] != tr.a_in[31]);
+
+      if (relation == COV_REL_EQ)
+        code = 0;
+      else if (relation == COV_REL_LT)
+        code = overflow ? 2 : 1;
+      else
+        code = overflow ? 4 : 3;
+
+      cg_sub.sample(code);
+    end
+
+
+    // ------------------------------------------------------------------------
+    // SH2ADD
+    // ------------------------------------------------------------------------
+    if (op == COV_OP_SH2ADD) begin
+      sh2_wide = {tr.a_in, 2'b00} + {{2{1'b0}}, tr.b_in};
+
+      if (|tr.a_in[31:30])
+        code = 2;
+      else
+        code = (|sh2_wide[33:32]) ? 1 : 0;
+
+      cg_sh2add.sample(code);
     end
 
 
@@ -962,14 +1099,27 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     // SEXT.B
     // ------------------------------------------------------------------------
     if (op == COV_OP_SEXT_B)
-      cg_sext_b.sample(tr.a_in[7:0]);
+      cg_sext_b.sample(
+        tr.a_in[7:0],
+        upper24_class(tr.a_in[31:8])
+      );
 
 
     // ------------------------------------------------------------------------
     // PACK
     // ------------------------------------------------------------------------
-    if (op == COV_OP_PACK)
-      cg_pack.sample(tr.a_in[15:0] != tr.b_in[15:0]);
+    if (op == COV_OP_PACK) begin
+      if ((tr.a_in[15:0] == 16'h0000) &&
+          (tr.b_in[15:0] == 16'h0000))
+        cg_pack.sample(0);
+
+      else if ((tr.a_in[15:0] == 16'hffff) &&
+               (tr.b_in[15:0] == 16'hffff))
+        cg_pack.sample(1);
+
+      else
+        cg_pack.sample(2);
+    end
 
 
     // ------------------------------------------------------------------------
@@ -1013,6 +1163,23 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
     end
 
+
+    if (op inside {
+          COV_OP_CSR_READ,
+          COV_OP_CSR_WRITE_A,
+          COV_OP_CSR_WRITE_B
+        }) begin
+
+      if (op == COV_OP_CSR_READ)
+        csr_data = tr.csr_rddata_in;
+      else if (op == COV_OP_CSR_WRITE_A)
+        csr_data = tr.a_in;
+      else
+        csr_data = tr.b_in;
+
+      cg_csr_data.sample(op, csr_data_class(csr_data));
+    end
+
   endfunction
 
 
@@ -1025,6 +1192,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     bmu_cov_op_e    op;
     bmu_cov_error_e error_reason;
     bit             has_error_intent;
+    bit             data_known;
 
 
     // ------------------------------------------------------------------------
@@ -1038,18 +1206,14 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
 
     // ------------------------------------------------------------------------
-    // Synchronous reset coverage.
-    // Scoreboard/assertions check result_ff=0 and error=0.
+    // Reset behavior is checked by scoreboard/assertions. Coverage only clears
+    // local history so no ignored-input pair can span across reset.
     // ------------------------------------------------------------------------
     if (!t.rst_l) begin
 
-      close_hold_run();
-
-      cg_reset.sample(activity_seen);
-
-      have_prev_valid = 0;
-      prev_valid_in   = 0;
-      activity_seen   = 0;
+      prev_accepted_legal = 0;
+      prev_data_known     = 0;
+      prev_op             = COV_OP_NONE;
 
       return;
 
@@ -1057,38 +1221,11 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
 
     // ------------------------------------------------------------------------
-    // valid_in temporal coverage.
+    // valid_in must be known before classifying an accepted request. Result
+    // hold and one-cycle latency are checked by scoreboard/assertions.
     // ------------------------------------------------------------------------
-    if (!$isunknown(t.valid_in)) begin
-
-      if (have_prev_valid)
-        cg_valid_transition.sample({prev_valid_in, t.valid_in});
-
-      if (!t.valid_in) begin
-
-        if (!hold_active) begin
-          hold_active = 1;
-          hold_length = 1;
-        end
-        else begin
-          hold_length++;
-        end
-
-      end
-      else begin
-
-        close_hold_run();
-
-      end
-
-      have_prev_valid = 1;
-      prev_valid_in   = t.valid_in;
-
-    end
-    else begin
-
+    if ($isunknown(t.valid_in)) begin
       return;
-
     end
 
 
@@ -1122,7 +1259,6 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     // ------------------------------------------------------------------------
     if (t.valid_in && is_unsupported_grev(t)) begin
       cg_grev.sample(0);
-      activity_seen = 1;
     end
 
 
@@ -1135,20 +1271,91 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
         (op != COV_OP_NONE)) begin
 
       cg_operation.sample(op);
-      activity_seen = 1;
+
+      data_known = !$isunknown({t.a_in, t.b_in});
+
+      if (data_known && prev_accepted_legal && prev_data_known) begin
+
+        if ((op inside {
+              COV_OP_SRL,
+              COV_OP_SRA,
+              COV_OP_ROR,
+              COV_OP_BINV,
+              COV_OP_GREV
+            }) &&
+            (prev_op == op) &&
+            (prev_a == t.a_in) &&
+            (prev_b[4:0] == t.b_in[4:0]) &&
+            (prev_b[31:5] != t.b_in[31:5])) begin
+
+          case (op)
+            COV_OP_SRL:  cg_ignored_input.sample(0);
+            COV_OP_SRA:  cg_ignored_input.sample(1);
+            COV_OP_ROR:  cg_ignored_input.sample(2);
+            COV_OP_BINV: cg_ignored_input.sample(3);
+            COV_OP_GREV: cg_ignored_input.sample(4);
+            default: ;
+          endcase
+        end
+
+        if ((op inside {
+              COV_OP_CTZ,
+              COV_OP_CPOP,
+              COV_OP_SEXT_B
+            }) &&
+            (prev_op == op) &&
+            (prev_a == t.a_in) &&
+            (prev_b != t.b_in)) begin
+
+          case (op)
+            COV_OP_CTZ:    cg_ignored_input.sample(5);
+            COV_OP_CPOP:   cg_ignored_input.sample(6);
+            COV_OP_SEXT_B: cg_ignored_input.sample(7);
+            default: ;
+          endcase
+        end
+
+        if ((op == COV_OP_SEXT_B) &&
+            (prev_op == COV_OP_SEXT_B) &&
+            (prev_a[7:0] == t.a_in[7:0]) &&
+            (prev_a[31:8] != t.a_in[31:8]))
+          cg_ignored_input.sample(8);
+
+        if ((op == COV_OP_PACK) &&
+            (prev_op == COV_OP_PACK) &&
+            (prev_a[15:0] == t.a_in[15:0]) &&
+            (prev_b[15:0] == t.b_in[15:0])) begin
+
+          if (prev_a[31:16] != t.a_in[31:16])
+            cg_ignored_input.sample(9);
+
+          if (prev_b[31:16] != t.b_in[31:16])
+            cg_ignored_input.sample(10);
+        end
+
+      end
 
       if (required_data_known(t, op))
         sample_legal_data(t, op);
 
+      prev_accepted_legal = 1;
+      prev_data_known     = data_known;
+      prev_op             = op;
+
+      if (data_known) begin
+        prev_a = t.a_in;
+        prev_b = t.b_in;
+      end
+
+    end
+    else begin
+
+      prev_accepted_legal = 0;
+      prev_data_known     = 0;
+      prev_op             = COV_OP_NONE;
+
     end
 
-  endfunction
-
-
-  // If a valid_in=0 run reaches end-of-test, close it for hold coverage.
-  function void report_phase(uvm_phase phase);
-    super.report_phase(phase);
-    close_hold_run();
   endfunction
 
 

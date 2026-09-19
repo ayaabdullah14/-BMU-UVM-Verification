@@ -14,7 +14,8 @@ module bmu_tb_top;
   bmu_if vif(clk);
 
   // DUT instance
-  Bit_Manipulation_Unit dut (
+  Bit_Manipulation_Unit  
+    dut (
     .clk           (vif.clk),
     .rst_l         (vif.rst_l),
     .scan_mode     (vif.scan_mode),

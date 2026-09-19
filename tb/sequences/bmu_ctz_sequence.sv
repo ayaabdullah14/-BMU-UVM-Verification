@@ -65,37 +65,27 @@ class bmu_ctz_sequence extends uvm_sequence #(bmu_seq_item);
 
 
 
-    // ------------------ CTZ-02 Constrained-random CTZ testing ------------------
+       // ------------------ CTZ-02 All nonzero CTZ results ------------------
 
     `uvm_info(
       get_type_name(),
-      "[CTZ-02] Constrained-random trailing-zero counts",
+      "[CTZ-02] Exercise every nonzero-input CTZ count from 0 to 31",
       UVM_LOW
-    )
+    );
 
-
-    for (int i = 0; i < 16; i++) begin
-
-      k = k_values[i];
+    for (int k = 0; k < 32; k++) begin
 
       start_item(req);
 
-      assert(req.randomize() with {
+      req.rst_l = 1;
+      req.scan_mode = 0;
+      req.valid_in = 1;
 
-        rst_l      == 1;
-        scan_mode  == 0;
-        valid_in   == 1;
-        csr_ren_in == 0;
-
-        // All bits below k must be zero
-        (a_in & ((32'h1 << k) - 1)) == 0;
-
-        // Bit k must be the first set bit
-        a_in[k] == 1;
-
-      });
-
+      req.csr_ren_in = 0;
       req.csr_rddata_in = 32'h00000000;
+
+      // The first set bit is exactly at position k.
+      req.a_in = (32'h00000001 << k);
       req.b_in = 32'h00000000;
 
       req.ap = 0;

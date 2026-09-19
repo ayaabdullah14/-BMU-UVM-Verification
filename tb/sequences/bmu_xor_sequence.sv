@@ -154,7 +154,25 @@ task body();
       finish_item(req);
 
     end
+    repeat (2) begin
 
+      start_item(req);
+
+      req.rst_l = 1;
+      req.scan_mode = 0;
+      req.valid_in = 0;
+
+      req.csr_ren_in = 0;
+      req.csr_rddata_in = 32'h00000000;
+
+      req.a_in = 32'h00000000;
+      req.b_in = 32'h00000000;
+
+      req.ap = 0;
+
+      finish_item(req);
+
+    end
 
 endtask: body
 

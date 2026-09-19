@@ -141,17 +141,39 @@ task body();
     end
 
 
-    //--------------------------- SRL-03: Corner shift behavior-----------------------------
-    
-    
-    `uvm_info(
-        get_type_name(),
-        "[SRL-03] SRL corner shift behavior",
-        UVM_LOW
-    );
+      //--------------------------- SRL-03: Corner shift and data behavior -----------------------------
 
-    for (int i = 0; i < 4; i++) begin
+      `uvm_info(
+          get_type_name(),
+          "[SRL-03] SRL corner shift and data behavior",
+          UVM_LOW
+      );
 
+      // Corner shift amounts using mixed data.
+      for (int i = 0; i < 4; i++) begin
+
+        start_item(req);
+
+        req.rst_l = 1;
+        req.scan_mode = 0;
+        req.valid_in = 1;
+        req.csr_ren_in = 0;
+        req.csr_rddata_in = 32'h00000000;
+
+        req.a_in = 32'h80000001;
+
+        req.b_in = 32'h00000000;
+        req.b_in[4:0] = corner_shifts[i];
+
+        req.ap = 0;
+        req.ap.srl = 1;
+
+        finish_item(req);
+
+      end
+
+
+      // All-zero input remains zero after a nonzero shift.
       start_item(req);
 
       req.rst_l = 1;
@@ -160,17 +182,31 @@ task body();
       req.csr_ren_in = 0;
       req.csr_rddata_in = 32'h00000000;
 
-      req.a_in = 32'h80000001;
-
-      req.b_in = 32'h00000000;
-      req.b_in[4:0] = corner_shifts[i];
+      req.a_in = 32'h00000000;
+      req.b_in = 32'd5;
 
       req.ap = 0;
       req.ap.srl = 1;
 
       finish_item(req);
 
-    end
+
+      // All-one input checks that SRL inserts zeros from the left.
+      start_item(req);
+
+      req.rst_l = 1;
+      req.scan_mode = 0;
+      req.valid_in = 1;
+      req.csr_ren_in = 0;
+      req.csr_rddata_in = 32'h00000000;
+
+      req.a_in = 32'hFFFFFFFF;
+      req.b_in = 32'd5;
+
+      req.ap = 0;
+      req.ap.srl = 1;
+
+      finish_item(req);
 
 
     // -----------------------------SRL-04: B[31:5] independence-------------------------
@@ -254,8 +290,8 @@ task body();
 
   
 // ------------------------------Idle cycle--------------------------------
-
-    start_item(req);
+    repeat (20) begin 
+     start_item(req);
 
     req.rst_l = 1;
     req.scan_mode = 0;
@@ -270,7 +306,7 @@ task body();
     req.ap = 0;
 
     finish_item(req);
-
+    end 
 
 endtask: body
 

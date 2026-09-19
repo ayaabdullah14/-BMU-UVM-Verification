@@ -26,9 +26,7 @@ class bmu_orn_test extends bmu_base_test;
 
     seq.start(env.agent.sequencer);
 
-    // Wait for monitor samples and the final one-cycle result.
-    repeat (4)
-      @(env.agent.monitor.vif.cb_mon);
+  
 
     `uvm_info(
       "BMU_ORN",

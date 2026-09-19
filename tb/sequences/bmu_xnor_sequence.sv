@@ -197,23 +197,26 @@ task body();
     finish_item(req);
 
 
-    // XOR operation using exactly the same operands
-    start_item(req);
 
-    req.rst_l = 1;
-    req.scan_mode = 0;
-    req.valid_in = 1;
-    req.csr_ren_in = 0;
-    req.csr_rddata_in = 32'h00000000;
+    repeat (2) begin
 
-    req.a_in = 32'h0F0F00FF;
-    req.b_in = 32'h3333CCCC;
+      start_item(req);
 
-    req.ap = 0;
-    req.ap.lxor = 1;
-    req.ap.zbb  = 0;
+      req.rst_l = 1;
+      req.scan_mode = 0;
+      req.valid_in = 0;
 
-    finish_item(req);
+      req.csr_ren_in = 0;
+      req.csr_rddata_in = 32'h00000000;
+
+      req.a_in = 32'h00000000;
+      req.b_in = 32'h00000000;
+
+      req.ap = 0;
+
+      finish_item(req);
+
+    end
 
 
 endtask: body

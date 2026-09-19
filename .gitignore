@@ -3,3 +3,23 @@ xrun.history
 xrun.log
 sim/logs/
 *.log
+
+# Xcelium / IMC generated files
+sim/build/
+sim/logs/
+sim/cov_work/
+sim/reports/
+sim/waves/
+sim/waves.shm/
+sim/html_*/
+sim/xcelium.d/
+sim/INCA_libs/
+sim/.simvision/
+sim/xrun.*
+sim/xcelium.*
+sim/*.history
+sim/*.key
+sim/*.diag
+sim/mdv.log
+sim/imc.log
+reports/logs/

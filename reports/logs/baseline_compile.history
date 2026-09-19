@@ -1,2 +1,0 @@
-#e1(03Sep2026:00:07:31): source ./xcelium.d/env.d/env.history.03Sep2026_00_07_31
-s1(03Sep2026:00:07:31):  xrun -64bit -sv -f filelist.f -elaborate -logfile ../reports/logs/baseline_compile.log 

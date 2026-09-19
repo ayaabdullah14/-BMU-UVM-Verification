@@ -8,43 +8,29 @@ package bmu_pkg;
   `include "uvm_macros.svh"
 
 
-  // ==========================================================================
-  // Transaction
-  // Must be visible before sequencer, driver, monitor and sequences
-  // ==========================================================================
-
   `include "env/agent/sequencer/bmu_seq_item.sv"
 
 
-  // ==========================================================================
   // Reference Model
-  // ==========================================================================
 
   `include "bmu_reference_model.sv"
 
 
-  // ==========================================================================
   // Agent
-  // ==========================================================================
-
   `include "env/agent/sequencer/bmu_sequencer.sv"
   `include "env/agent/driver/bmu_driver.sv"
   `include "env/agent/monitor/bmu_monitor.sv"
   `include "env/agent/bmu_agent.sv"
 
 
-  // ==========================================================================
   // Environment
-  // ==========================================================================
 
   `include "env/scoreboard/bmu_scoreboard.sv"
   `include "env/coverage/bmu_subscriber.sv"
   `include "env/bmu_env.sv"
 
 
-  // ==========================================================================
-  // Sequences
-  // ==========================================================================
+  // ------------------------------Sequences------------------------
 
   `include "sequences/bmu_base_sequence.sv"
   `include "sequences/bmu_smoke_sequence.sv"
@@ -84,9 +70,7 @@ package bmu_pkg;
   `include "sequences/bmu_mixed_sequence.sv"
 
 
-  // ==========================================================================
-  // Tests
-  // ==========================================================================
+  //----------------------------------------- Tests---------------------------------------------------------------
 
   // Base test must come before all derived tests
   `include "tests/bmu_base_test.sv"
