@@ -137,6 +137,29 @@ class bmu_smoke_sequence extends bmu_base_sequence;
 
     finish_item(tr);
 
+     `uvm_info(
+      "BMU_SMOKE_SEQ",
+      "Sent NOP: expected result=0x00000000 error=0",
+      UVM_LOW
+    )
+
+
+    repeat (2) begin
+
+    start_item(tr);
+  
+    tr.rst_l         = 1'b1;
+    tr.scan_mode     = 1'b0;
+    tr.valid_in      = 1'b0;
+    tr.ap            = '0;
+    tr.csr_ren_in    = 1'b0;
+    tr.csr_rddata_in = 32'h0000_0000;
+    tr.a_in          = 32'h0000_0000;
+    tr.b_in          = 32'h0000_0000;
+  
+    finish_item(tr);
+  
+     end
 
     `uvm_info(
       "BMU_SMOKE_SEQ",
@@ -145,16 +168,7 @@ class bmu_smoke_sequence extends bmu_base_sequence;
     )
 
 
-    // After the sequence finishes, the driver sees no new item
-    // and automatically drives valid_in=0.
-    // The smoke test waits for the final pending response.
-
-
-    `uvm_info(
-      "BMU_SMOKE_SEQ",
-      "Smoke sequence body completed",
-      UVM_LOW
-    )
+   
 
 
   endtask: body
