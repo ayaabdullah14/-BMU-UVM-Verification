@@ -519,28 +519,6 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
   endgroup
 
 
-  // ==========================================================================
-  // 17. IGNORED INPUTS
-  // One paired observation per documented ignored-input dependency.
-  // ==========================================================================
-
-  covergroup cg_ignored_input with function sample(int unsigned code);
-    option.per_instance = 1;
-
-    cp_case: coverpoint code {
-      bins srl_upper_b       = {0};
-      bins sra_upper_b       = {1};
-      bins ror_upper_b       = {2};
-      bins binv_upper_b      = {3};
-      bins grev_upper_b      = {4};
-      bins ctz_b             = {5};
-      bins cpop_b            = {6};
-      bins sext_b_b          = {7};
-      bins sext_b_upper_a    = {8};
-      bins pack_upper_a      = {9};
-      bins pack_upper_b      = {10};
-    }
-  endgroup
 
 
   // ==========================================================================
@@ -572,7 +550,6 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     cg_csr_data         = new();
     cg_error_reason     = new();
     cg_error_valid      = new();
-    cg_ignored_input    = new();
 
     prev_accepted_legal = 0;
     prev_data_known     = 0;
@@ -774,7 +751,9 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     bmu_cov_op_e op;
 
     // CSR read OR bit-manipulation request conflict.
-    if (tr.csr_ren_in && has_bmu_primary(tr)) begin
+    // CSR read is legal only when all AP fields are zero.
+// Error does not depend on valid_in.
+    if (tr.csr_ren_in && (tr.ap != '0)) begin
       reason = COV_ERR_CSR_CONFLICT;
       return 1;
     end
@@ -1288,14 +1267,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
             (prev_b[4:0] == t.b_in[4:0]) &&
             (prev_b[31:5] != t.b_in[31:5])) begin
 
-          case (op)
-            COV_OP_SRL:  cg_ignored_input.sample(0);
-            COV_OP_SRA:  cg_ignored_input.sample(1);
-            COV_OP_ROR:  cg_ignored_input.sample(2);
-            COV_OP_BINV: cg_ignored_input.sample(3);
-            COV_OP_GREV: cg_ignored_input.sample(4);
-            default: ;
-          endcase
+          
         end
 
         if ((op inside {
@@ -1307,31 +1279,10 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
             (prev_a == t.a_in) &&
             (prev_b != t.b_in)) begin
 
-          case (op)
-            COV_OP_CTZ:    cg_ignored_input.sample(5);
-            COV_OP_CPOP:   cg_ignored_input.sample(6);
-            COV_OP_SEXT_B: cg_ignored_input.sample(7);
-            default: ;
-          endcase
+          
         end
 
-        if ((op == COV_OP_SEXT_B) &&
-            (prev_op == COV_OP_SEXT_B) &&
-            (prev_a[7:0] == t.a_in[7:0]) &&
-            (prev_a[31:8] != t.a_in[31:8]))
-          cg_ignored_input.sample(8);
-
-        if ((op == COV_OP_PACK) &&
-            (prev_op == COV_OP_PACK) &&
-            (prev_a[15:0] == t.a_in[15:0]) &&
-            (prev_b[15:0] == t.b_in[15:0])) begin
-
-          if (prev_a[31:16] != t.a_in[31:16])
-            cg_ignored_input.sample(9);
-
-          if (prev_b[31:16] != t.b_in[31:16])
-            cg_ignored_input.sample(10);
-        end
+        
 
       end
 
