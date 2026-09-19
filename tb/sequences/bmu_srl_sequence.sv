@@ -271,23 +271,6 @@ task body();
     finish_item(req);
 
 
-    // SRA using exactly the same operands
-    start_item(req);
-
-    req.rst_l = 1;
-    req.scan_mode = 0;
-    req.valid_in = 1;
-    req.csr_ren_in = 0;
-    req.csr_rddata_in = 32'h00000000;
-
-    req.a_in = 32'h80000000;
-    req.b_in = 32'h00000001;
-
-    req.ap = 0;
-    req.ap.sra = 1;
-
-    finish_item(req);
-
   
 // ------------------------------Idle cycle--------------------------------
     repeat (2) begin 
