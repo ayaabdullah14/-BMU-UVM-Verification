@@ -522,7 +522,7 @@ class bmu_mixed_sequence extends uvm_sequence #(bmu_seq_item);
 
 
     //---------------------- One idle drain cycle-----------------------------------
-
+    repeart (2) begin 
     start_item(req);
 
     req.rst_l = 1;
@@ -539,7 +539,7 @@ class bmu_mixed_sequence extends uvm_sequence #(bmu_seq_item);
 
     finish_item(req);
 
-
+    end 
   endtask : body
 
 endclass : bmu_mixed_sequence
