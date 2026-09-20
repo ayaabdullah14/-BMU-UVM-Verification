@@ -1,69 +1,62 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := run
 
-
 # ============================================================
 # USER OPTIONS
 # ============================================================
 
-TEST      ?= bmu_smoke_test
-REG_TEST  := bmu_regression_test
+# Default test. Override from command line when needed:
+#   make run TEST=bmu_ctz_test SEED=4
+TEST      ?= bmu_regression_test
 SEED      ?= 1
-VERBOSITY ?= UVM_MEDIUM
+VERBOSITY ?= UVM_LOW
+
+# Keep each test/seed in a separate coverage database.
+RUN_NAME := $(TEST)_seed$(SEED)
 
 
 # ============================================================
 # DESIGN
 # ============================================================
 
-TOP      := bmu_tb_top
-DUT      := Bit_Manipulation_Unit
 FILELIST := filelist.f
 SNAPSHOT := bmu_uvm_snapshot
 
 
-# RTL files used only for the optional source-level exercise ratio.
-RTL_FILES := \
-	../rtl/Bit_Manipulation_Unit.sv \
-	../rtl/rtl_lib.sv \
-	../rtl/rtl_param.sv \
-	../rtl/rtl_pdef.sv \
-	../rtl/rtl_def.sv \
-	../rtl/rtl_defines.sv
-
-
 # ============================================================
-# DIRECTORIES
+# DIRECTORIES / OUTPUT
 # ============================================================
 
 BUILD_DIR  := build
 LOG_DIR    := logs
 COV_DIR    := cov_work
-REPORT_DIR := reports
+REPORT_DIR := reports/$(RUN_NAME)
 
+LOG    := $(LOG_DIR)/$(RUN_NAME).log
+COV_DB := $(COV_DIR)/scope/$(RUN_NAME)
 
-# ============================================================
-# TEST-SPECIFIC OUTPUT
-# ============================================================
+# Official IMC reports.
+FUNC_SUMMARY   := $(REPORT_DIR)/functional_summary.txt
+FUNC_DETAIL    := $(REPORT_DIR)/functional_detail.txt
 
-LOG           := $(LOG_DIR)/$(TEST)_seed$(SEED).log
-COV_DB        := $(COV_DIR)/scope/$(TEST)
+BLOCK_SUMMARY  := $(REPORT_DIR)/block_summary.txt
+BLOCK_DETAIL   := $(REPORT_DIR)/block_detail.txt
 
-FUNC_REPORT   := $(REPORT_DIR)/$(TEST)_functional.txt
-CODE_REPORT   := $(REPORT_DIR)/$(TEST)_code.txt
-BLOCK_REPORT  := $(REPORT_DIR)/$(TEST)_block_detail.txt
-EXPR_REPORT   := $(REPORT_DIR)/$(TEST)_expression_detail.txt
-TOGGLE_REPORT := $(REPORT_DIR)/$(TEST)_toggle_detail.txt
+EXPR_SUMMARY   := $(REPORT_DIR)/expression_summary.txt
+EXPR_DETAIL    := $(REPORT_DIR)/expression_detail.txt
 
-
-# make imc              -> regression coverage
-# make imc TEST=...     -> requested test coverage
-IMC_TEST := $(if $(filter command line,$(origin TEST)),$(TEST),$(REG_TEST))
-IMC_DB   := $(COV_DIR)/scope/$(IMC_TEST)
+TOGGLE_SUMMARY := $(REPORT_DIR)/toggle_summary.txt
+TOGGLE_DETAIL  := $(REPORT_DIR)/toggle_detail.txt
 
 
 # ============================================================
 # XRUN OPTIONS
+#
+# Keep the same final coverage scope:
+#   - coverage enabled during compile and run
+#   - no -covdut restriction
+#   - no -top restriction
+#   - every TEST + SEED gets its own database
 # ============================================================
 
 COMPILE_FLAGS := \
@@ -71,16 +64,13 @@ COMPILE_FLAGS := \
 	-sv \
 	-uvm \
 	-f $(FILELIST) \
-	-top $(TOP) \
 	-elaborate \
 	-snapshot $(SNAPSHOT) \
 	-xmlibdirname $(BUILD_DIR)/xcelium.d \
 	-access +rwc \
 	-timescale 1ns/1ps \
 	-coverage all \
-	-covdut $(DUT) \
 	-covworkdir $(COV_DIR)
-
 
 RUN_FLAGS := \
 	-64bit \
@@ -92,309 +82,22 @@ RUN_FLAGS := \
 	-svseed $(SEED) \
 	-coverage all \
 	-covworkdir $(COV_DIR) \
-	-covtest $(TEST) \
+	-covtest $(RUN_NAME) \
 	-covoverwrite
 
 
 # ============================================================
-# COMPILE
-# ============================================================
-
-compile:
-	@mkdir -p $(BUILD_DIR) $(LOG_DIR) $(COV_DIR) $(REPORT_DIR)
-	@echo "============================================================"
-	@echo " COMPILE"
-	@echo "============================================================"
-	@xrun $(COMPILE_FLAGS) \
-		-l $(LOG_DIR)/compile.log
-
-
-# ============================================================
-# RUN
-# ============================================================
-
-run: compile
-	@echo ""
-	@echo "============================================================"
-	@echo " RUN : $(TEST)"
-	@echo " SEED: $(SEED)"
-	@echo "============================================================"
-
-	@xrun $(RUN_FLAGS) \
-		-l $(LOG)
-
-	@echo ""
-	@echo "============================================================"
-	@echo " SCOREBOARD : $(TEST)"
-	@echo "============================================================"
-	@grep "\[BMU_SB_SUMMARY\]" $(LOG) | tail -1 || true
-
-	@echo ""
-	@echo "============================================================"
-	@echo " UVM RESULT"
-	@echo "============================================================"
-	@grep -E "UVM_(ERROR|FATAL)[[:space:]]*:" $(LOG) | tail -2 || true
-
-
-# ============================================================
-# CHECK
-# ============================================================
-
-check:
-	@$(MAKE) --no-print-directory run \
-		TEST=$(TEST) \
-		SEED=$(SEED) \
-		VERBOSITY=$(VERBOSITY)
-
-	@$(MAKE) --no-print-directory coverage \
-		TEST=$(TEST) \
-		SEED=$(SEED)
-
-
-# ============================================================
-# REGRESSION
-# ============================================================
-
-regression:
-	@$(MAKE) --no-print-directory check \
-		TEST=$(REG_TEST) \
-		SEED=$(SEED) \
-		VERBOSITY=$(VERBOSITY)
-
-
-# ============================================================
-# COVERAGE
-# ============================================================
-
-coverage:
-	@if [[ ! -d "$(COV_DB)" ]]; then \
-		echo "ERROR: Coverage database not found for $(TEST)"; \
-		echo "Expected: $(COV_DB)"; \
-		echo ""; \
-		echo "Run first:"; \
-		echo "  make run TEST=$(TEST)"; \
-		exit 1; \
-	fi
-
-	@mkdir -p $(REPORT_DIR)
-
-	@echo ""
-	@echo "============================================================"
-	@echo " COVERAGE : $(TEST)"
-	@echo "============================================================"
-
-
-	@imc \
-		-load $(COV_DB) \
-		-execcmd "report -detail -metrics functional -all -out $(FUNC_REPORT); exit" \
-		> $(REPORT_DIR)/$(TEST)_functional_imc.log 2>&1
-
-
-	@imc \
-		-load $(COV_DB) \
-		-execcmd "report -summary -metrics all -cumulative on -showempty on -out $(CODE_REPORT); exit" \
-		> $(REPORT_DIR)/$(TEST)_code_imc.log 2>&1
-
-
-	@imc \
-		-load $(COV_DB) \
-		-execcmd "report -detail -metrics block -all -out $(BLOCK_REPORT); exit" \
-		> $(REPORT_DIR)/$(TEST)_block_imc.log 2>&1
-
-
-	@imc \
-		-load $(COV_DB) \
-		-execcmd "report -detail -metrics expression -all -out $(EXPR_REPORT); exit" \
-		> $(REPORT_DIR)/$(TEST)_expression_imc.log 2>&1
-
-
-	@imc \
-		-load $(COV_DB) \
-		-execcmd "report -detail -metrics toggle -all -out $(TOGGLE_REPORT); exit" \
-		> $(REPORT_DIR)/$(TEST)_toggle_imc.log 2>&1
-
-
-	@echo ""
-	@echo "============================================================"
-	@echo " FUNCTIONAL COVERAGE"
-	@echo "============================================================"
-
-	@if [[ -s "$(FUNC_REPORT)" ]]; then \
-		awk '$$1 ~ /^cg_/ { \
-			name=$$1; \
-			sub(/^cg_/, "", name); \
-			gsub(/_/, " ", name); \
-			printf "%-28s %8s %s\n", name, $$3, $$4; \
-		}' $(FUNC_REPORT); \
-	else \
-		echo "Functional coverage report is empty."; \
-	fi
-
-
-	@echo ""
-	@echo "============================================================"
-	@echo " OFFICIAL XCELIUM CODE COVERAGE"
-	@echo "============================================================"
-
-	@awk '$$1 == "$(DUT)" { \
-		printf "Block Coverage      : %s %s\n", $$3, $$4; \
-		printf "Expression Coverage : %s %s\n", $$8, $$9; \
-		printf "Toggle Coverage     : %s %s\n", $$13, $$14; \
-		found=1; \
-		exit; \
-	} \
-	END { \
-		if (!found) \
-			print "DUT coverage row not found in code report."; \
-	}' $(CODE_REPORT)
-
-
-	@echo ""
-	@echo "============================================================"
-	@echo " SOURCE BLOCK EXERCISE RATIO"
-	@echo "============================================================"
-
-	@total_blocks=$$(awk '\
-		{ \
-			line=$$0; \
-			sub(/\/\/.*/, "", line); \
-			\
-			if (line ~ /^[[:space:]]*always_comb([[:space:]]|$$)/ || \
-			    line ~ /^[[:space:]]*always_ff([[:space:]]|$$)/ || \
-			    line ~ /^[[:space:]]*always_latch([[:space:]]|$$)/ || \
-			    line ~ /^[[:space:]]*always[[:space:]]*@/) \
-				total += 1; \
-			\
-			if (line ~ /^[[:space:]]*if[[:space:]]*\(/) \
-				total += 1; \
-			\
-			if (line ~ /^[[:space:]]*(end[[:space:]]+)?else([[:space:]]|$$)/) \
-				total += 1; \
-			\
-			if (line ~ /^[[:space:]]*for[[:space:]]*\(/) \
-				total += 2; \
-		} \
-		END { print total+0 }' $(RTL_FILES)); \
-	\
-	covered_blocks=$$(awk '\
-		/^File name:/ { \
-			file=$$0; \
-			sub(/^File name:[[:space:]]*/, "", file); \
-		} \
-		$$1 ~ /^[0-9]+$$/ && \
-		$$2 ~ /^[0-9]+$$/ && \
-		$$3 ~ /^[0-9]+$$/ { \
-			if ($$1 > 0) { \
-				key=file "|" $$2 "|" $$3; \
-				hit[key]=1; \
-			} \
-		} \
-		END { \
-			n=0; \
-			for (k in hit) n++; \
-			print n; \
-		}' $(BLOCK_REPORT)); \
-	\
-	if [[ $$covered_blocks -gt $$total_blocks ]]; then \
-		covered_blocks=$$total_blocks; \
-	fi; \
-	\
-	pct=$$(awk \
-		-v c="$$covered_blocks" \
-		-v t="$$total_blocks" \
-		'BEGIN { \
-			if (t > 0) \
-				printf "%.2f", 100*c/t; \
-			else \
-				printf "0.00"; \
-		}'); \
-	\
-	echo "Source Exercise      : $$covered_blocks/$$total_blocks ($$pct%)"; \
-	echo "(Source-level audit metric; not an official Xcelium metric.)"
-
-
-	@echo ""
-	@echo "============================================================"
-	@echo " SCOREBOARD"
-	@echo "============================================================"
-
-	@if [[ -f "$(LOG)" ]]; then \
-		grep "\[BMU_SB_SUMMARY\]" $(LOG) | tail -1 || true; \
-	else \
-		echo "Log not found: $(LOG)"; \
-	fi
-
-
-	@echo ""
-	@echo "============================================================"
-	@echo " REPORT FILES"
-	@echo "============================================================"
-	@echo "Functional : $(FUNC_REPORT)"
-	@echo "Code       : $(CODE_REPORT)"
-	@echo "Block      : $(BLOCK_REPORT)"
-	@echo "Expression : $(EXPR_REPORT)"
-	@echo "Toggle     : $(TOGGLE_REPORT)"
-	@echo "============================================================"
-
-
-# ============================================================
-# WAVEFORM
-# ============================================================
-
-wave: compile
-	@echo ""
-	@echo "============================================================"
-	@echo " WAVE : $(TEST)"
-	@echo "============================================================"
-
-	@xrun $(RUN_FLAGS) \
-		-gui \
-		-l $(LOG)
-
-
-# ============================================================
-# IMC GUI
-# ============================================================
-
-imc:
-	@if [[ ! -d "$(IMC_DB)" ]]; then \
-		echo "ERROR: Coverage database not found for $(IMC_TEST)"; \
-		echo "Expected: $(IMC_DB)"; \
-		echo ""; \
-		echo "Available coverage databases:"; \
-		if [[ -d "$(COV_DIR)/scope" ]]; then \
-			find $(COV_DIR)/scope -mindepth 1 -maxdepth 1 -type d \
-				-printf "  %f\n" 2>/dev/null || true; \
-		else \
-			echo "  none"; \
-		fi; \
-		echo ""; \
-		echo "Examples:"; \
-		echo "  make regression"; \
-		echo "  make imc"; \
-		echo "  make imc TEST=bmu_ctz_test"; \
-		exit 1; \
-	fi
-
-	@echo "[IMC] $(IMC_TEST)"
-
-	@imc \
-		-load $(IMC_DB) \
-		-gui
-
-
-# ============================================================
 # CLEAN
+#   make clean
 # ============================================================
 
 clean:
 	@echo "[CLEAN] Removing generated simulation files"
-
 	@rm -rf \
 		$(BUILD_DIR) \
 		$(LOG_DIR) \
 		$(COV_DIR) \
-		$(REPORT_DIR) \
+		reports \
 		xcelium.d \
 		INCA_libs \
 		.simvision \
@@ -410,46 +113,222 @@ clean:
 		imc.log \
 		hdl.var \
 		cds.lib
-
 	@echo "[CLEAN] Done"
 
 
 # ============================================================
-# HELP
+# COMPILE
+#   make compile
 # ============================================================
 
-help:
-	@echo ""
-	@echo "BMU UVM Verification"
-	@echo ""
-	@echo "Run default smoke test:"
-	@echo "  make"
-	@echo ""
-	@echo "Run specific test:"
-	@echo "  make run TEST=bmu_ctz_test"
-	@echo ""
-	@echo "Run test + coverage:"
-	@echo "  make check TEST=bmu_ctz_test"
-	@echo ""
-	@echo "Generate coverage report:"
-	@echo "  make coverage TEST=bmu_ctz_test"
-	@echo ""
-	@echo "Run full regression:"
-	@echo "  make regression"
-	@echo "  make regression SEED=20"
-	@echo ""
-	@echo "Open regression coverage in IMC:"
-	@echo "  make imc"
-	@echo ""
-	@echo "Open specific test in IMC:"
-	@echo "  make imc TEST=bmu_ctz_test"
-	@echo ""
-	@echo "Run with GUI:"
-	@echo "  make wave TEST=bmu_ctz_test"
-	@echo ""
-	@echo "Remove generated files:"
-	@echo "  make clean"
-	@echo ""
+compile:
+	@mkdir -p $(BUILD_DIR) $(LOG_DIR) $(COV_DIR) $(REPORT_DIR)
+	@echo "============================================================"
+	@echo " COMPILE"
+	@echo "============================================================"
+	@xrun $(COMPILE_FLAGS) \
+		-l $(LOG_DIR)/compile.log
 
 
-.PHONY: compile run check regression coverage wave imc clean help
+# ============================================================
+# RUN
+#   make run
+#   make run TEST=bmu_ctz_test SEED=4
+# ============================================================
+
+run: compile
+	@mkdir -p $(REPORT_DIR)
+	@echo ""
+	@echo "============================================================"
+	@echo " RUN"
+	@echo " TEST : $(TEST)"
+	@echo " SEED : $(SEED)"
+	@echo " DB   : $(COV_DB)"
+	@echo "============================================================"
+
+	@xrun $(RUN_FLAGS) \
+		-l $(LOG)
+
+	@echo ""
+	@echo "============================================================"
+	@echo " UVM RESULT"
+	@echo "============================================================"
+	@grep "\[BMU_SB_SUMMARY\]" $(LOG) | tail -1 || true
+	@grep -E "^UVM_(ERROR|FATAL)[[:space:]]*:" $(LOG) | tail -2 || true
+
+
+# ============================================================
+# COVERAGE
+#   make coverage
+#   make coverage TEST=bmu_regression_test SEED=4
+#
+# IMPORTANT:
+#   This keeps the final method we reached:
+#   - IMC/Xcelium is the only source of coverage numbers.
+#   - Functional coverage is separate from code coverage.
+#   - Block / Expression / Toggle are separate code metrics.
+#   - No fake source ratio.
+#   - No hand-calculated coverage percentage.
+# ============================================================
+
+coverage:
+	@if [[ ! -d "$(COV_DB)" ]]; then \
+		echo "ERROR: Coverage database not found."; \
+		echo "Expected: $(COV_DB)"; \
+		echo "Run first:"; \
+		echo "  make run TEST=$(TEST) SEED=$(SEED)"; \
+		exit 1; \
+	fi
+
+	@mkdir -p $(REPORT_DIR)
+
+	@echo ""
+	@echo "============================================================"
+	@echo " COVERAGE"
+	@echo " TEST : $(TEST)"
+	@echo " SEED : $(SEED)"
+	@echo " DB   : $(COV_DB)"
+	@echo "============================================================"
+
+	@echo "[IMC] Functional coverage..."
+	@imc -64 \
+		-load $(COV_DB) \
+		-execcmd "report -summary -metrics functional -cumulative on -showempty on -out $(FUNC_SUMMARY); exit" \
+		> $(REPORT_DIR)/functional_summary_imc.log 2>&1
+
+	@imc -64 \
+		-load $(COV_DB) \
+		-execcmd "report -detail -metrics functional -all -out $(FUNC_DETAIL); exit" \
+		> $(REPORT_DIR)/functional_detail_imc.log 2>&1
+
+	@echo "[IMC] Block coverage..."
+	@imc -64 \
+		-load $(COV_DB) \
+		-execcmd "report -summary -metrics block -cumulative on -showempty on -out $(BLOCK_SUMMARY); exit" \
+		> $(REPORT_DIR)/block_summary_imc.log 2>&1
+
+	@imc -64 \
+		-load $(COV_DB) \
+		-execcmd "report -detail -metrics block -all -out $(BLOCK_DETAIL); exit" \
+		> $(REPORT_DIR)/block_detail_imc.log 2>&1
+
+	@echo "[IMC] Expression coverage..."
+	@imc -64 \
+		-load $(COV_DB) \
+		-execcmd "report -summary -metrics expression -cumulative on -showempty on -out $(EXPR_SUMMARY); exit" \
+		> $(REPORT_DIR)/expression_summary_imc.log 2>&1
+
+	@imc -64 \
+		-load $(COV_DB) \
+		-execcmd "report -detail -metrics expression -all -out $(EXPR_DETAIL); exit" \
+		> $(REPORT_DIR)/expression_detail_imc.log 2>&1
+
+	@echo "[IMC] Toggle coverage..."
+	@imc -64 \
+		-load $(COV_DB) \
+		-execcmd "report -summary -metrics toggle -cumulative on -showempty on -out $(TOGGLE_SUMMARY); exit" \
+		> $(REPORT_DIR)/toggle_summary_imc.log 2>&1
+
+	@imc -64 \
+		-load $(COV_DB) \
+		-execcmd "report -detail -metrics toggle -all -out $(TOGGLE_DETAIL); exit" \
+		> $(REPORT_DIR)/toggle_detail_imc.log 2>&1
+
+	@echo ""
+	@echo "============================================================"
+	@echo " COVERAGE SUMMARY"
+	@echo "============================================================"
+
+	@echo ""
+	@echo "FUNCTIONAL COVERAGE - SUBSCRIBER"
+	@echo "------------------------------------------------------------"
+	@grep -E "subscriber[[:space:]]" $(FUNC_SUMMARY) | tail -1 || \
+		echo "See: $(FUNC_SUMMARY)"
+
+	@echo ""
+	@echo "CODE COVERAGE - BMU HIERARCHY"
+	@echo "------------------------------------------------------------"
+
+	@echo "BLOCK:"
+	@grep -E "^[[:space:]|+-]*bmu_tb_top[[:space:]]|^[[:space:]|+-]*dut[[:space:]]" \
+		$(BLOCK_SUMMARY) | tail -2 || true
+
+	@echo ""
+	@echo "EXPRESSION:"
+	@grep -E "^[[:space:]|+-]*bmu_tb_top[[:space:]]|^[[:space:]|+-]*dut[[:space:]]" \
+		$(EXPR_SUMMARY) | tail -2 || true
+
+	@echo ""
+	@echo "TOGGLE:"
+	@grep -E "^[[:space:]|+-]*bmu_tb_top[[:space:]]|^[[:space:]|+-]*dut[[:space:]]" \
+		$(TOGGLE_SUMMARY) | tail -2 || true
+
+	@echo ""
+	@echo "CODE COVERAGE - ALL RTL SCOPE"
+	@echo "------------------------------------------------------------"
+	@echo "IMC GUI overall grades include every elaborated RTL design unit,"
+	@echo "including standalone rtl_lib modules that may be unused by the BMU."
+	@echo ""
+	@echo "Top-level RTL entries with Block coverage data:"
+	@grep -E "^[A-Za-z_][A-Za-z0-9_]*[[:space:]]+[0-9]" $(BLOCK_SUMMARY) || true
+
+	@echo ""
+	@echo "------------------------------------------------------------"
+	@echo "IMPORTANT:"
+	@echo "  BMU hierarchy numbers above are NOT the same as IMC's ALL-RTL grade."
+	@echo "  Example: DUT Block can be 100% while IMC overall Block grade is lower"
+	@echo "  because unused standalone rtl_lib modules are also in the denominator."
+	@echo ""
+	@echo "Full official IMC reports:"
+	@echo "  Functional : $(FUNC_SUMMARY)"
+	@echo "  Block      : $(BLOCK_SUMMARY)"
+	@echo "  Expression : $(EXPR_SUMMARY)"
+	@echo "  Toggle     : $(TOGGLE_SUMMARY)"
+	@echo ""
+	@echo "All displayed percentages are copied directly from IMC reports."
+	@echo "No coverage percentage is calculated by the Makefile."
+	@echo "============================================================"
+
+
+# ============================================================
+# WAVE
+#   make wave
+#   make wave TEST=bmu_ctz_test SEED=4
+# ============================================================
+
+wave: compile
+	@mkdir -p $(REPORT_DIR)
+	@echo ""
+	@echo "============================================================"
+	@echo " WAVE"
+	@echo " TEST : $(TEST)"
+	@echo " SEED : $(SEED)"
+	@echo "============================================================"
+
+	@xrun $(RUN_FLAGS) \
+		-gui \
+		-l $(LOG)
+
+
+# ============================================================
+# IMC
+#   make imc
+#   make imc TEST=bmu_regression_test SEED=4
+# ============================================================
+
+imc:
+	@if [[ ! -d "$(COV_DB)" ]]; then \
+		echo "ERROR: Coverage database not found."; \
+		echo "Expected: $(COV_DB)"; \
+		echo "Run first:"; \
+		echo "  make run TEST=$(TEST) SEED=$(SEED)"; \
+		exit 1; \
+	fi
+
+	@echo "[IMC] $(COV_DB)"
+	@imc -64 \
+		-load $(COV_DB) \
+		-gui
+
+
+.PHONY: clean compile run coverage wave imc
