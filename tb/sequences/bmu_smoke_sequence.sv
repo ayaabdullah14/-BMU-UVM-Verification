@@ -1,4 +1,4 @@
-class bmu_smoke_sequence extends bmu_base_sequence;
+class bmu_smoke_sequence extends uvm_sequence #(bmu_seq_item);
 
   `uvm_object_utils(bmu_smoke_sequence)
 
