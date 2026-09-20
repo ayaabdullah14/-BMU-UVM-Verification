@@ -32,7 +32,6 @@ package bmu_pkg;
 
   // ------------------------------Sequences------------------------
 
-  `include "sequences/bmu_base_sequence.sv"
   `include "sequences/bmu_smoke_sequence.sv"
 
   `include "sequences/bmu_or_sequence.sv"
@@ -52,7 +51,6 @@ package bmu_pkg;
   `include "sequences/bmu_slt_sequence.sv"
 
   `include "sequences/bmu_ctz_sequence.sv"
-  `include "sequences/bmu_ctz_debug_sequence.sv"
 
   `include "sequences/bmu_cpop_sequence.sv"
   `include "sequences/bmu_sext_b_sequence.sv"
@@ -79,36 +77,26 @@ package bmu_pkg;
 
   // Reference-model unit test
   `include "tests/bmu_reference_model_unit_test.sv"
-
   `include "tests/bmu_or_test.sv"
   `include "tests/bmu_orn_test.sv"
   `include "tests/bmu_xor_test.sv"
   `include "tests/bmu_xnor_test.sv"
-
   `include "tests/bmu_srl_test.sv"
   `include "tests/bmu_sra_test.sv"
   `include "tests/bmu_ror_test.sv"
   `include "tests/bmu_binv_test.sv"
-
   `include "tests/bmu_sh2add_test.sv"
   `include "tests/bmu_sub_test.sv"
-
   `include "tests/bmu_sltu_test.sv"
   `include "tests/bmu_slt_test.sv"
-
   `include "tests/bmu_ctz_test.sv"
-  `include "tests/bmu_ctz_debug_test.sv"
-
   `include "tests/bmu_cpop_test.sv"
   `include "tests/bmu_sext_b_test.sv"
-
   `include "tests/bmu_max_test.sv"
   `include "tests/bmu_pack_test.sv"
   `include "tests/bmu_grev_test.sv"
-
   `include "tests/bmu_csr_read_test.sv"
   `include "tests/bmu_csr_write_test.sv"
-
   `include "tests/bmu_error_test.sv"
   `include "tests/bmu_reset_test.sv"
   `include "tests/bmu_valid_in_test.sv"
