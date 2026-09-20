@@ -99,6 +99,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_operation with function sample(bmu_cov_op_e op);
     option.per_instance = 1;
+    option.name = "cg_operation";
 
     cp_op: coverpoint op {
       bins legal_modes[] = {
@@ -144,6 +145,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     logic [1:0] pair
   );
     option.per_instance = 1;
+    option.name = "cg_logic";
 
     cp_op: coverpoint op {
       option.weight = 0;
@@ -181,6 +183,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     logic [4:0] amount
   );
     option.per_instance = 1;
+    option.name = "cg_shift";
 
     cp_op: coverpoint op {
       option.weight = 0;
@@ -212,6 +215,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_sra_sign with function sample(bit sign_bit);
     option.per_instance = 1;
+    option.name = "cg_sra_sign";
 
     cp_sign: coverpoint sign_bit {
       bins positive = {0};
@@ -232,6 +236,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     bit original_bit
   );
     option.per_instance = 1;
+    option.name = "cg_binv";
 
     cp_index: coverpoint index {
       bins lsb        = {5'd0};
@@ -254,6 +259,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_compare with function sample(int unsigned code);
     option.per_instance = 1;
+    option.name = "cg_compare";
 
     cp_case: coverpoint code {
       bins reachable[] = {[0:35]};
@@ -272,6 +278,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     bmu_cov_shift_data_e data_class
   );
     option.per_instance = 1;
+    option.name = "cg_shift_data";
 
     cp_op: coverpoint op {
       option.weight = 0;
@@ -292,6 +299,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_sub with function sample(int unsigned code);
     option.per_instance = 1;
+    option.name = "cg_sub";
 
     cp_case: coverpoint code {
       bins equal                    = {0};
@@ -305,6 +313,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_sh2add with function sample(int unsigned code);
     option.per_instance = 1;
+    option.name = "cg_sh2add";
 
     cp_case: coverpoint code {
       bins normal_no_carry     = {0};
@@ -324,6 +333,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_ctz with function sample(int unsigned count);
     option.per_instance = 1;
+    option.name = "cg_ctz";
 
     cp_count: coverpoint count {
       bins values[] = {[0:32]};
@@ -338,6 +348,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_cpop_count with function sample(int unsigned count);
     option.per_instance = 1;
+    option.name = "cg_cpop_count";
 
     cp_count: coverpoint count {
       bins zero       = {0};
@@ -361,6 +372,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_cpop_region with function sample(int unsigned bit_index);
     option.per_instance = 1;
+    option.name = "cg_cpop_region";
 
     cp_region: coverpoint bit_index {
       bins byte0 = {[0:7]};
@@ -380,6 +392,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     bmu_cov_upper_e upper_class
   );
     option.per_instance = 1;
+    option.name = "cg_sext_b";
 
     cp_byte: coverpoint byte_value {
       bins zero           = {8'h00};
@@ -411,6 +424,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_pack with function sample(int unsigned code);
     option.per_instance = 1;
+    option.name = "cg_pack";
 
     cp_case: coverpoint code {
       bins both_zero = {0};
@@ -429,6 +443,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_grev with function sample(bit supported);
     option.per_instance = 1;
+    option.name = "cg_grev";
 
     cp_mode: coverpoint supported {
       bins unsupported = {0};
@@ -447,6 +462,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_csr_source with function sample(int unsigned code);
     option.per_instance = 1;
+    option.name = "cg_csr_source";
 
     cp_source: coverpoint code {
       bins read_distinct    = {0};
@@ -461,6 +477,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
     bmu_cov_csr_data_e data_class
   );
     option.per_instance = 1;
+    option.name = "cg_csr_data";
 
     cp_path: coverpoint path {
       option.weight = 0;
@@ -488,6 +505,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_error_reason with function sample(bmu_cov_error_e reason);
     option.per_instance = 1;
+    option.name = "cg_error_reason";
 
     cp_reason: coverpoint reason {
       bins reasons[] = {
@@ -511,6 +529,7 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
 
   covergroup cg_error_valid with function sample(bit valid_value);
     option.per_instance = 1;
+    option.name = "cg_error_valid";
 
     cp_valid: coverpoint valid_value {
       bins low  = {0};
@@ -557,737 +576,420 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
   endfunction
 
 
-  // ==========================================================================
-  // HELPERS
-  // ==========================================================================
-
-  function automatic int unsigned active_bits(bmu_seq_item tr);
-    return $countones(tr.ap);
-  endfunction
-
-
-  // Primary BMU controls only.
-  // Mode/companion bits (zbb/zba/unsign) are intentionally not enough by
-  // themselves to constitute a BMU instruction.
-  function automatic bit has_bmu_primary(bmu_seq_item tr);
-    return (
-      tr.ap.lor     ||
-      tr.ap.lxor    ||
-      tr.ap.srl     ||
-      tr.ap.sra     ||
-      tr.ap.ror     ||
-      tr.ap.binv    ||
-      tr.ap.sh2add  ||
-      tr.ap.sub     ||
-      tr.ap.slt     ||
-      tr.ap.ctz     ||
-      tr.ap.cpop    ||
-      tr.ap.siext_b ||
-      tr.ap.max     ||
-      tr.ap.pack    ||
-      tr.ap.grev
-    );
-  endfunction
-
-
-  function automatic int unsigned primary_count(bmu_seq_item tr);
-    return $countones({
-      tr.ap.lor,
-      tr.ap.lxor,
-      tr.ap.srl,
-      tr.ap.sra,
-      tr.ap.ror,
-      tr.ap.binv,
-      tr.ap.sh2add,
-      tr.ap.sub,
-      tr.ap.slt,
-      tr.ap.ctz,
-      tr.ap.cpop,
-      tr.ap.siext_b,
-      tr.ap.max,
-      tr.ap.pack,
-      tr.ap.grev
-    });
-  endfunction
-
-
-  // Checks whether the primary-operation bits match one documented recipe.
-  // Other AP bits are intentionally ignored here so an otherwise legal
-  // primary recipe with an extra field can be classified separately.
-  function automatic bit matches_legal_primary_recipe(bmu_seq_item tr);
-    int unsigned n;
-
-    n = primary_count(tr);
-
-    if (tr.ap.slt && tr.ap.sub && (n == 2))
-      return 1;
-
-    if (tr.ap.max && tr.ap.sub && (n == 2))
-      return 1;
-
-    if ((n == 1) && has_bmu_primary(tr))
-      return 1;
-
-    return 0;
-  endfunction
-
-
-  // Decode only clean, documented functional requests.
-  //
-  // IMPORTANT:
-  // For CSR WRITE, the exact ap-bit-count checks are used only to identify the
-  // clean functional request for coverage. They do NOT define the error policy
-  // for undocumented CSR-write collisions.
-  function automatic bmu_cov_op_e decode_legal_op(bmu_seq_item tr);
-    int unsigned n;
-
-    n = active_bits(tr);
-
-    // CSR read bypass: documented example uses csr_ren_in=1 with ap cleared.
-    if (tr.csr_ren_in && (tr.ap == '0))
-      return COV_OP_CSR_READ;
-
-    if (tr.csr_ren_in)
-      return COV_OP_NONE;
-
-    // SLT / SLTU
-    if (tr.ap.slt && tr.ap.sub && !tr.ap.unsign && (n == 2))
-      return COV_OP_SLT;
-
-    if (tr.ap.slt && tr.ap.sub && tr.ap.unsign && (n == 3))
-      return COV_OP_SLTU;
-
-    // Signed MAX
-    if (tr.ap.max && tr.ap.sub && !tr.ap.unsign && (n == 2))
-      return COV_OP_MAX;
-
-    // SH2ADD
-    if (tr.ap.sh2add && tr.ap.zba && (n == 2))
-      return COV_OP_SH2ADD;
-
-    // Logic
-    if (tr.ap.lor && !tr.ap.zbb && (n == 1))
-      return COV_OP_OR;
-
-    if (tr.ap.lor && tr.ap.zbb && (n == 2))
-      return COV_OP_ORN;
-
-    if (tr.ap.lxor && !tr.ap.zbb && (n == 1))
-      return COV_OP_XOR;
-
-    if (tr.ap.lxor && tr.ap.zbb && (n == 2))
-      return COV_OP_XNOR;
-
-    // Shift / rotate / bit index
-    if (tr.ap.srl && (n == 1))
-      return COV_OP_SRL;
-
-    if (tr.ap.sra && (n == 1))
-      return COV_OP_SRA;
-
-    if (tr.ap.ror && (n == 1))
-      return COV_OP_ROR;
-
-    if (tr.ap.binv && (n == 1))
-      return COV_OP_BINV;
-
-    // Arithmetic
-    if (tr.ap.sub && !tr.ap.zba && (n == 1))
-      return COV_OP_SUB;
-
-    // Count / extend
-    if (tr.ap.ctz && (n == 1))
-      return COV_OP_CTZ;
-
-    if (tr.ap.cpop && (n == 1))
-      return COV_OP_CPOP;
-
-    if (tr.ap.siext_b && (n == 1))
-      return COV_OP_SEXT_B;
-
-    // PACK
-    if (tr.ap.pack && (n == 1))
-      return COV_OP_PACK;
-
-    // GREV supported REV8 mode
-    if (tr.ap.grev &&
-        (n == 1) &&
-        (tr.b_in[4:0] == 5'd24))
-      return COV_OP_GREV;
-
-    // CSR write source selection.
-    if (tr.ap.csr_write &&
-        !tr.ap.csr_imm &&
-        (n == 1))
-      return COV_OP_CSR_WRITE_A;
-
-    if (tr.ap.csr_write &&
-        tr.ap.csr_imm &&
-        (n == 2))
-      return COV_OP_CSR_WRITE_B;
-
-    return COV_OP_NONE;
-  endfunction
-
-
-  function automatic bit is_unsupported_grev(bmu_seq_item tr);
-    return (
-      !tr.csr_ren_in &&
-      tr.ap.grev &&
-      (active_bits(tr) == 1) &&
-      (tr.b_in[4:0] != 5'd24)
-    );
-  endfunction
-
-
-  // Error classification is based on the request stimulus, never on DUT error.
-  //
-  // CSR conflict is restricted to CSR read + BMU primary control, matching
-  // the spec statement. csr_ren_in + csr_write is NOT guessed here.
-  function automatic bit classify_error(
-    bmu_seq_item tr,
-    output bmu_cov_error_e reason
-  );
-    bmu_cov_op_e op;
-
-    // CSR read OR bit-manipulation request conflict.
-    // CSR read is legal only when all AP fields are zero.
-// Error does not depend on valid_in.
-    if (tr.csr_ren_in && (tr.ap != '0)) begin
-      reason = COV_ERR_CSR_CONFLICT;
-      return 1;
-    end
-
-    // SH2ADD requires zba.
-    if (tr.ap.sh2add &&
-        (primary_count(tr) == 1) &&
-        !tr.ap.zba) begin
-      reason = COV_ERR_SH2ADD_NO_ZBA;
-      return 1;
-    end
-
-    // Standalone SUB forbids zba.
-    if (tr.ap.sub &&
-        tr.ap.zba &&
-        (primary_count(tr) == 1)) begin
-      reason = COV_ERR_SUB_WITH_ZBA;
-      return 1;
-    end
-
-    // GREV with a clean control vector but mode != 24 is unsupported,
-    // not an error according to the approved interpretation.
-    if (is_unsupported_grev(tr))
-      return 0;
-
-    // CSR-write collisions are still undocumented in the verification plan.
-    // Do not guess their error behavior until that clarification is closed.
-    if (has_bmu_primary(tr) &&
-        (tr.ap.csr_write || tr.ap.csr_imm))
-      return 0;
-
-    op = decode_legal_op(tr);
-
-    // Trainer-corrected extra-field conflicts.
-    // An invalid multi-primary request cannot be assigned reliably to one
-    // operation name, so coverage records the conflict type instead.
-    if (!tr.csr_ren_in && (op == COV_OP_NONE)) begin
-
-      if (matches_legal_primary_recipe(tr)) begin
-        reason = COV_ERR_EXTRA_FIELD;
-        return 1;
-      end
-
-      if (primary_count(tr) > 1) begin
-        reason = COV_ERR_MULTI_OPERATION;
-        return 1;
-      end
-
-    end
-
-    return 0;
-  endfunction
-
-
-  function automatic bmu_cov_relation_e unsigned_relation(
-    logic [31:0] a,
-    logic [31:0] b
-  );
-    if (a < b)
-      return COV_REL_LT;
-
-    if (a > b)
-      return COV_REL_GT;
-
-    return COV_REL_EQ;
-  endfunction
-
-
-  function automatic bmu_cov_relation_e signed_relation(
-    logic [31:0] a,
-    logic [31:0] b
-  );
-    if ($signed(a) < $signed(b))
-      return COV_REL_LT;
-
-    if ($signed(a) > $signed(b))
-      return COV_REL_GT;
-
-    return COV_REL_EQ;
-  endfunction
-
-
-  function automatic int unsigned ctz32(logic [31:0] value);
-    if (value == 32'h0)
-      return 32;
-
-    for (int unsigned i = 0; i < 32; i++) begin
-      if (value[i])
-        return i;
-    end
-
-    return 32;
-  endfunction
-
-
-  function automatic int onehot_index32(logic [31:0] value);
-    for (int unsigned i = 0; i < 32; i++) begin
-      if (value[i])
-        return i;
-    end
-
-    return -1;
-  endfunction
-
-
-  function automatic bmu_cov_upper_e upper24_class(logic [23:0] value);
-    if (value == 24'h000000)
-      return COV_UPPER_ZERO;
-
-    return COV_UPPER_NONZERO;
-  endfunction
-
-
-  function automatic bmu_cov_csr_data_e csr_data_class(logic [31:0] value);
-    if (value == 32'h00000000)
-      return COV_CSR_ZERO;
-
-    if (value == 32'hffffffff)
-      return COV_CSR_ONES;
-
-    return COV_CSR_OTHER;
-  endfunction
-
-
-  function automatic bmu_cov_shift_data_e shift_data_class(
-    logic [31:0] value
-  );
-    if (value == 32'h00000000)
-      return COV_SHIFT_ZERO;
-
-    if (value == 32'hffffffff)
-      return COV_SHIFT_ONES;
-
-    if ($onehot(value))
-      return COV_SHIFT_ONEHOT;
-
-    return COV_SHIFT_OTHER;
-  endfunction
-
-
-  function automatic bit required_data_known(
-    bmu_seq_item tr,
-    bmu_cov_op_e op
-  );
-    case (op)
-
-      COV_OP_CSR_READ:
-        return !$isunknown(tr.csr_rddata_in);
-
-      COV_OP_CSR_WRITE_A:
-        return !$isunknown(tr.a_in);
-
-      COV_OP_CSR_WRITE_B:
-        return !$isunknown(tr.b_in);
-
-      default:
-        return !$isunknown({tr.a_in, tr.b_in});
-
-    endcase
-  endfunction
-
-
-  // ==========================================================================
-  // OPERATION-SPECIFIC SAMPLING
-  // ==========================================================================
-
-  function void sample_legal_data(
-    bmu_seq_item tr,
-    bmu_cov_op_e op
-  );
-    bmu_cov_relation_e relation;
-    logic [32:0] sub_wide;
-    logic [33:0] sh2_wide;
-    logic [31:0] csr_data;
-    int unsigned code;
-    int unsigned count_value;
-    int bit_index;
-    bit overflow;
-
-
-    // ------------------------------------------------------------------------
-    // Logic truth tables
-    // ------------------------------------------------------------------------
-    if (op inside {
-          COV_OP_OR,
-          COV_OP_ORN,
-          COV_OP_XOR,
-          COV_OP_XNOR
-        }) begin
-
-      for (int unsigned i = 0; i < 32; i++)
-        cg_logic.sample(op, {tr.a_in[i], tr.b_in[i]});
-
-    end
-
-
-    // ------------------------------------------------------------------------
-    // Shift / rotate
-    // ------------------------------------------------------------------------
-    if (op inside {
-          COV_OP_SRL,
-          COV_OP_SRA,
-          COV_OP_ROR
-        }) begin
-
-      cg_shift.sample(op, tr.b_in[4:0]);
-      cg_shift_data.sample(op, shift_data_class(tr.a_in));
-
-      // Amount 0 does not exercise arithmetic sign extension.
-      if ((op == COV_OP_SRA) &&
-          (tr.b_in[4:0] != 5'd0))
-        cg_sra_sign.sample(tr.a_in[31]);
-
-    end
-
-
-    // ------------------------------------------------------------------------
-    // BINV
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_BINV) begin
-      cg_binv.sample(
-        tr.b_in[4:0],
-        tr.a_in[tr.b_in[4:0]]
-      );
-    end
-
-
-    // ------------------------------------------------------------------------
-    // SLT / SLTU / MAX
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_SLT) begin
-
-      relation = signed_relation(tr.a_in, tr.b_in);
-      code = ({tr.a_in[31], tr.b_in[31]} * 3) + relation;
-      cg_compare.sample(code);
-
-    end
-
-
-    else if (op == COV_OP_SLTU) begin
-
-      relation = unsigned_relation(tr.a_in, tr.b_in);
-      code = 12 + ({tr.a_in[31], tr.b_in[31]} * 3) + relation;
-      cg_compare.sample(code);
-
-    end
-
-
-    else if (op == COV_OP_MAX) begin
-
-      relation = signed_relation(tr.a_in, tr.b_in);
-      code = 24 + ({tr.a_in[31], tr.b_in[31]} * 3) + relation;
-      cg_compare.sample(code);
-
-    end
-
-
-    // ------------------------------------------------------------------------
-    // SUB
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_SUB) begin
-      relation = unsigned_relation(tr.a_in, tr.b_in);
-      sub_wide = {1'b0, tr.a_in} - {1'b0, tr.b_in};
-      overflow = (tr.a_in[31] != tr.b_in[31]) &&
-                 (sub_wide[31] != tr.a_in[31]);
-
-      if (relation == COV_REL_EQ)
-        code = 0;
-      else if (relation == COV_REL_LT)
-        code = overflow ? 2 : 1;
-      else
-        code = overflow ? 4 : 3;
-
-      cg_sub.sample(code);
-    end
-
-
-    // ------------------------------------------------------------------------
-    // SH2ADD
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_SH2ADD) begin
-      sh2_wide = {tr.a_in, 2'b00} + {{2{1'b0}}, tr.b_in};
-
-      if (|tr.a_in[31:30])
-        code = 2;
-      else
-        code = (|sh2_wide[33:32]) ? 1 : 0;
-
-      cg_sh2add.sample(code);
-    end
-
-
-    // ------------------------------------------------------------------------
-    // CTZ
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_CTZ) begin
-      cg_ctz.sample(
-        ctz32(tr.a_in)
-      );
-    end
-
-
-    // ------------------------------------------------------------------------
-    // CPOP
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_CPOP) begin
-
-      count_value = $countones(tr.a_in);
-      cg_cpop_count.sample(count_value);
-
-      if ($onehot(tr.a_in)) begin
-        bit_index = onehot_index32(tr.a_in);
-
-        if (bit_index >= 0)
-          cg_cpop_region.sample(bit_index);
-      end
-
-    end
-
-
-    // ------------------------------------------------------------------------
-    // SEXT.B
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_SEXT_B)
-      cg_sext_b.sample(
-        tr.a_in[7:0],
-        upper24_class(tr.a_in[31:8])
-      );
-
-
-    // ------------------------------------------------------------------------
-    // PACK
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_PACK) begin
-      if ((tr.a_in[15:0] == 16'h0000) &&
-          (tr.b_in[15:0] == 16'h0000))
-        cg_pack.sample(0);
-
-      else if ((tr.a_in[15:0] == 16'hffff) &&
-               (tr.b_in[15:0] == 16'hffff))
-        cg_pack.sample(1);
-
-      else
-        cg_pack.sample(2);
-    end
-
-
-    // ------------------------------------------------------------------------
-    // GREV supported REV8
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_GREV)
-      cg_grev.sample(1);
-
-
-    // ------------------------------------------------------------------------
-    // CSR source-selection observability
-    // ------------------------------------------------------------------------
-    if (op == COV_OP_CSR_READ) begin
-
-      if (!$isunknown({
-            tr.csr_rddata_in,
-            tr.a_in,
-            tr.b_in
-          }) &&
-          (tr.csr_rddata_in != tr.a_in) &&
-          (tr.csr_rddata_in != tr.b_in))
-        cg_csr_source.sample(0);
-
-    end
-
-
-    else if (op == COV_OP_CSR_WRITE_A) begin
-
-      if (!$isunknown({tr.a_in, tr.b_in}) &&
-          (tr.a_in != tr.b_in))
-        cg_csr_source.sample(1);
-
-    end
-
-
-    else if (op == COV_OP_CSR_WRITE_B) begin
-
-      if (!$isunknown({tr.a_in, tr.b_in}) &&
-          (tr.a_in != tr.b_in))
-        cg_csr_source.sample(2);
-
-    end
-
-
-    if (op inside {
-          COV_OP_CSR_READ,
-          COV_OP_CSR_WRITE_A,
-          COV_OP_CSR_WRITE_B
-        }) begin
-
-      if (op == COV_OP_CSR_READ)
-        csr_data = tr.csr_rddata_in;
-      else if (op == COV_OP_CSR_WRITE_A)
-        csr_data = tr.a_in;
-      else
-        csr_data = tr.b_in;
-
-      cg_csr_data.sample(op, csr_data_class(csr_data));
-    end
-
-  endfunction
-
-
-  // ==========================================================================
+// ============================================================================
   // WRITE
-  // ==========================================================================
+  //
+  // All classification and sampling is intentionally kept inline here.
+  // No custom helper functions are used.
+  // ============================================================================
 
   virtual function void write(bmu_seq_item t);
 
-    bmu_cov_op_e    op;
-    bmu_cov_error_e error_reason;
-    bit             has_error_intent;
-    bit             data_known;
+    bmu_cov_op_e          op;
+    bmu_cov_error_e       error_reason;
+    bmu_cov_relation_e    relation;
+    bmu_cov_upper_e       upper_class;
+    bmu_cov_csr_data_e    csr_class;
+    bmu_cov_shift_data_e  shift_class;
 
+    logic [32:0] sub_wide;
+    logic [33:0] sh2_wide;
+    logic [31:0] csr_data;
 
-    // ------------------------------------------------------------------------
-    // Ignore unknown reset/scan samples and scan mode.
-    // ------------------------------------------------------------------------
+    int unsigned n;
+    int unsigned primary_n;
+    int unsigned code;
+    int unsigned count_value;
+    int          bit_index;
+
+    bit has_primary;
+    bit legal_primary_recipe;
+    bit unsupported_grev;
+    bit has_error_intent;
+    bit data_known;
+    bit required_known;
+    bit overflow;
+
     if ($isunknown({t.rst_l, t.scan_mode}))
       return;
 
     if (t.scan_mode != 1'b0)
       return;
 
-
-    // ------------------------------------------------------------------------
-    // Reset behavior is checked by scoreboard/assertions. Coverage only clears
-    // local history so no ignored-input pair can span across reset.
-    // ------------------------------------------------------------------------
     if (!t.rst_l) begin
-
       prev_accepted_legal = 0;
       prev_data_known     = 0;
       prev_op             = COV_OP_NONE;
-
-      return;
-
-    end
-
-
-    // ------------------------------------------------------------------------
-    // valid_in must be known before classifying an accepted request. Result
-    // hold and one-cycle latency are checked by scoreboard/assertions.
-    // ------------------------------------------------------------------------
-    if ($isunknown(t.valid_in)) begin
       return;
     end
 
+    if ($isunknown(t.valid_in))
+      return;
 
-    // ------------------------------------------------------------------------
-    // Need known controls for request classification.
-    // ------------------------------------------------------------------------
     if ($isunknown({t.ap, t.csr_ren_in}))
       return;
 
     if (t.ap.grev && $isunknown(t.b_in[4:0]))
       return;
 
+    n = $countones(t.ap);
 
-    // ------------------------------------------------------------------------
-    // Error-intent coverage is independent of valid_in.
-    // ------------------------------------------------------------------------
-    has_error_intent =
-      classify_error(
-        t,
-        error_reason
-      );
+    primary_n = $countones({
+      t.ap.lor,
+      t.ap.lxor,
+      t.ap.srl,
+      t.ap.sra,
+      t.ap.ror,
+      t.ap.binv,
+      t.ap.sh2add,
+      t.ap.sub,
+      t.ap.slt,
+      t.ap.ctz,
+      t.ap.cpop,
+      t.ap.siext_b,
+      t.ap.max,
+      t.ap.pack,
+      t.ap.grev
+    });
+
+    has_primary = (
+      t.ap.lor     ||
+      t.ap.lxor    ||
+      t.ap.srl     ||
+      t.ap.sra     ||
+      t.ap.ror     ||
+      t.ap.binv    ||
+      t.ap.sh2add  ||
+      t.ap.sub     ||
+      t.ap.slt     ||
+      t.ap.ctz     ||
+      t.ap.cpop    ||
+      t.ap.siext_b ||
+      t.ap.max     ||
+      t.ap.pack    ||
+      t.ap.grev
+    );
+
+    legal_primary_recipe =
+      (t.ap.slt && t.ap.sub && (primary_n == 2)) ||
+      (t.ap.max && t.ap.sub && (primary_n == 2)) ||
+      ((primary_n == 1) && has_primary);
+
+    unsupported_grev = (
+      !t.csr_ren_in &&
+      t.ap.grev &&
+      (n == 1) &&
+      (t.b_in[4:0] != 5'd24)
+    );
+
+    op = COV_OP_NONE;
+
+    if (t.csr_ren_in && (t.ap == '0))
+      op = COV_OP_CSR_READ;
+    else if (t.csr_ren_in)
+      op = COV_OP_NONE;
+    else if (t.ap.slt && t.ap.sub && !t.ap.unsign && (n == 2))
+      op = COV_OP_SLT;
+    else if (t.ap.slt && t.ap.sub && t.ap.unsign && (n == 3))
+      op = COV_OP_SLTU;
+    else if (t.ap.max && t.ap.sub && !t.ap.unsign && (n == 2))
+      op = COV_OP_MAX;
+    else if (t.ap.sh2add && t.ap.zba && (n == 2))
+      op = COV_OP_SH2ADD;
+    else if (t.ap.lor && !t.ap.zbb && (n == 1))
+      op = COV_OP_OR;
+    else if (t.ap.lor && t.ap.zbb && (n == 2))
+      op = COV_OP_ORN;
+    else if (t.ap.lxor && !t.ap.zbb && (n == 1))
+      op = COV_OP_XOR;
+    else if (t.ap.lxor && t.ap.zbb && (n == 2))
+      op = COV_OP_XNOR;
+    else if (t.ap.srl && (n == 1))
+      op = COV_OP_SRL;
+    else if (t.ap.sra && (n == 1))
+      op = COV_OP_SRA;
+    else if (t.ap.ror && (n == 1))
+      op = COV_OP_ROR;
+    else if (t.ap.binv && (n == 1))
+      op = COV_OP_BINV;
+    else if (t.ap.sub && !t.ap.zba && (n == 1))
+      op = COV_OP_SUB;
+    else if (t.ap.ctz && (n == 1))
+      op = COV_OP_CTZ;
+    else if (t.ap.cpop && (n == 1))
+      op = COV_OP_CPOP;
+    else if (t.ap.siext_b && (n == 1))
+      op = COV_OP_SEXT_B;
+    else if (t.ap.pack && (n == 1))
+      op = COV_OP_PACK;
+    else if (t.ap.grev && (n == 1) && (t.b_in[4:0] == 5'd24))
+      op = COV_OP_GREV;
+    else if (t.ap.csr_write && !t.ap.csr_imm && (n == 1))
+      op = COV_OP_CSR_WRITE_A;
+    else if (t.ap.csr_write && t.ap.csr_imm && (n == 2))
+      op = COV_OP_CSR_WRITE_B;
+
+    has_error_intent = 0;
+
+    if (t.csr_ren_in && (t.ap != '0)) begin
+      error_reason     = COV_ERR_CSR_CONFLICT;
+      has_error_intent = 1;
+    end
+    else if (t.ap.sh2add && (primary_n == 1) && !t.ap.zba) begin
+      error_reason     = COV_ERR_SH2ADD_NO_ZBA;
+      has_error_intent = 1;
+    end
+    else if (t.ap.sub && t.ap.zba && (primary_n == 1)) begin
+      error_reason     = COV_ERR_SUB_WITH_ZBA;
+      has_error_intent = 1;
+    end
+    else if (unsupported_grev) begin
+      has_error_intent = 0;
+    end
+    else if (has_primary && (t.ap.csr_write || t.ap.csr_imm)) begin
+      has_error_intent = 0;
+    end
+    else if (!t.csr_ren_in && (op == COV_OP_NONE)) begin
+      if (legal_primary_recipe) begin
+        error_reason     = COV_ERR_EXTRA_FIELD;
+        has_error_intent = 1;
+      end
+      else if (primary_n > 1) begin
+        error_reason     = COV_ERR_MULTI_OPERATION;
+        has_error_intent = 1;
+      end
+    end
 
     if (has_error_intent) begin
       cg_error_reason.sample(error_reason);
       cg_error_valid.sample(t.valid_in);
     end
 
-
-    // ------------------------------------------------------------------------
-    // Unsupported GREV mode: valid functional request class, no error.
-    // ------------------------------------------------------------------------
-    if (t.valid_in && is_unsupported_grev(t)) begin
+    if (t.valid_in && unsupported_grev)
       cg_grev.sample(0);
-    end
 
-
-    // ------------------------------------------------------------------------
-    // Legal operation coverage is sampled only for valid accepted requests.
-    // ------------------------------------------------------------------------
-    op = decode_legal_op(t);
-
-    if (t.valid_in &&
-        (op != COV_OP_NONE)) begin
+    if (t.valid_in && (op != COV_OP_NONE)) begin
 
       cg_operation.sample(op);
 
       data_known = !$isunknown({t.a_in, t.b_in});
 
       if (data_known && prev_accepted_legal && prev_data_known) begin
-
         if ((op inside {
-              COV_OP_SRL,
-              COV_OP_SRA,
-              COV_OP_ROR,
-              COV_OP_BINV,
-              COV_OP_GREV
+              COV_OP_SRL, COV_OP_SRA, COV_OP_ROR, COV_OP_BINV, COV_OP_GREV
             }) &&
             (prev_op == op) &&
             (prev_a == t.a_in) &&
             (prev_b[4:0] == t.b_in[4:0]) &&
             (prev_b[31:5] != t.b_in[31:5])) begin
-
-          
         end
 
-        if ((op inside {
-              COV_OP_CTZ,
-              COV_OP_CPOP,
-              COV_OP_SEXT_B
-            }) &&
+        if ((op inside {COV_OP_CTZ, COV_OP_CPOP, COV_OP_SEXT_B}) &&
             (prev_op == op) &&
             (prev_a == t.a_in) &&
             (prev_b != t.b_in)) begin
-
-          
         end
-
-        
-
       end
 
-      if (required_data_known(t, op))
-        sample_legal_data(t, op);
+      case (op)
+        COV_OP_CSR_READ:
+          required_known = !$isunknown(t.csr_rddata_in);
+        COV_OP_CSR_WRITE_A:
+          required_known = !$isunknown(t.a_in);
+        COV_OP_CSR_WRITE_B:
+          required_known = !$isunknown(t.b_in);
+        default:
+          required_known = !$isunknown({t.a_in, t.b_in});
+      endcase
+
+      if (required_known) begin
+
+        if (op inside {COV_OP_OR, COV_OP_ORN, COV_OP_XOR, COV_OP_XNOR}) begin
+          for (int unsigned i = 0; i < 32; i++)
+            cg_logic.sample(op, {t.a_in[i], t.b_in[i]});
+        end
+
+        if (op inside {COV_OP_SRL, COV_OP_SRA, COV_OP_ROR}) begin
+          cg_shift.sample(op, t.b_in[4:0]);
+
+          if (t.a_in == 32'h00000000)
+            shift_class = COV_SHIFT_ZERO;
+          else if (t.a_in == 32'hffffffff)
+            shift_class = COV_SHIFT_ONES;
+          else if ($onehot(t.a_in))
+            shift_class = COV_SHIFT_ONEHOT;
+          else
+            shift_class = COV_SHIFT_OTHER;
+
+          cg_shift_data.sample(op, shift_class);
+
+          if ((op == COV_OP_SRA) && (t.b_in[4:0] != 5'd0))
+            cg_sra_sign.sample(t.a_in[31]);
+        end
+
+        if (op == COV_OP_BINV) begin
+          cg_binv.sample(t.b_in[4:0], t.a_in[t.b_in[4:0]]);
+        end
+
+        if (op == COV_OP_SLT) begin
+          if ($signed(t.a_in) < $signed(t.b_in))
+            relation = COV_REL_LT;
+          else if ($signed(t.a_in) > $signed(t.b_in))
+            relation = COV_REL_GT;
+          else
+            relation = COV_REL_EQ;
+
+          code = ({t.a_in[31], t.b_in[31]} * 3) + relation;
+          cg_compare.sample(code);
+        end
+        else if (op == COV_OP_SLTU) begin
+          if (t.a_in < t.b_in)
+            relation = COV_REL_LT;
+          else if (t.a_in > t.b_in)
+            relation = COV_REL_GT;
+          else
+            relation = COV_REL_EQ;
+
+          code = 12 + ({t.a_in[31], t.b_in[31]} * 3) + relation;
+          cg_compare.sample(code);
+        end
+        else if (op == COV_OP_MAX) begin
+          if ($signed(t.a_in) < $signed(t.b_in))
+            relation = COV_REL_LT;
+          else if ($signed(t.a_in) > $signed(t.b_in))
+            relation = COV_REL_GT;
+          else
+            relation = COV_REL_EQ;
+
+          code = 24 + ({t.a_in[31], t.b_in[31]} * 3) + relation;
+          cg_compare.sample(code);
+        end
+
+        if (op == COV_OP_SUB) begin
+          if (t.a_in < t.b_in)
+            relation = COV_REL_LT;
+          else if (t.a_in > t.b_in)
+            relation = COV_REL_GT;
+          else
+            relation = COV_REL_EQ;
+
+          sub_wide = {1'b0, t.a_in} - {1'b0, t.b_in};
+          overflow = (t.a_in[31] != t.b_in[31]) &&
+                     (sub_wide[31] != t.a_in[31]);
+
+          if (relation == COV_REL_EQ)
+            code = 0;
+          else if (relation == COV_REL_LT)
+            code = overflow ? 2 : 1;
+          else
+            code = overflow ? 4 : 3;
+
+          cg_sub.sample(code);
+        end
+
+        if (op == COV_OP_SH2ADD) begin
+          sh2_wide = {t.a_in, 2'b00} + {{2{1'b0}}, t.b_in};
+
+          if (|t.a_in[31:30])
+            code = 2;
+          else
+            code = (|sh2_wide[33:32]) ? 1 : 0;
+
+          cg_sh2add.sample(code);
+        end
+
+        if (op == COV_OP_CTZ) begin
+          count_value = 32;
+
+          for (int unsigned i = 0; i < 32; i++) begin
+            if ((count_value == 32) && t.a_in[i])
+              count_value = i;
+          end
+
+          cg_ctz.sample(count_value);
+        end
+
+        if (op == COV_OP_CPOP) begin
+          count_value = $countones(t.a_in);
+          cg_cpop_count.sample(count_value);
+
+          if ($onehot(t.a_in)) begin
+            bit_index = -1;
+
+            for (int unsigned i = 0; i < 32; i++) begin
+              if ((bit_index < 0) && t.a_in[i])
+                bit_index = i;
+            end
+
+            if (bit_index >= 0)
+              cg_cpop_region.sample(bit_index);
+          end
+        end
+
+        if (op == COV_OP_SEXT_B) begin
+          if (t.a_in[31:8] == 24'h000000)
+            upper_class = COV_UPPER_ZERO;
+          else
+            upper_class = COV_UPPER_NONZERO;
+
+          cg_sext_b.sample(t.a_in[7:0], upper_class);
+        end
+
+        if (op == COV_OP_PACK) begin
+          if ((t.a_in[15:0] == 16'h0000) &&
+              (t.b_in[15:0] == 16'h0000))
+            cg_pack.sample(0);
+          else if ((t.a_in[15:0] == 16'hffff) &&
+                   (t.b_in[15:0] == 16'hffff))
+            cg_pack.sample(1);
+          else
+            cg_pack.sample(2);
+        end
+
+        if (op == COV_OP_GREV)
+          cg_grev.sample(1);
+
+        if (op == COV_OP_CSR_READ) begin
+          if (!$isunknown({t.csr_rddata_in, t.a_in, t.b_in}) &&
+              (t.csr_rddata_in != t.a_in) &&
+              (t.csr_rddata_in != t.b_in))
+            cg_csr_source.sample(0);
+        end
+        else if (op == COV_OP_CSR_WRITE_A) begin
+          if (!$isunknown({t.a_in, t.b_in}) &&
+              (t.a_in != t.b_in))
+            cg_csr_source.sample(1);
+        end
+        else if (op == COV_OP_CSR_WRITE_B) begin
+          if (!$isunknown({t.a_in, t.b_in}) &&
+              (t.a_in != t.b_in))
+            cg_csr_source.sample(2);
+        end
+
+        if (op inside {
+              COV_OP_CSR_READ,
+              COV_OP_CSR_WRITE_A,
+              COV_OP_CSR_WRITE_B
+            }) begin
+
+          if (op == COV_OP_CSR_READ)
+            csr_data = t.csr_rddata_in;
+          else if (op == COV_OP_CSR_WRITE_A)
+            csr_data = t.a_in;
+          else
+            csr_data = t.b_in;
+
+          if (csr_data == 32'h00000000)
+            csr_class = COV_CSR_ZERO;
+          else if (csr_data == 32'hffffffff)
+            csr_class = COV_CSR_ONES;
+          else
+            csr_class = COV_CSR_OTHER;
+
+          cg_csr_data.sample(op, csr_class);
+        end
+
+      end
 
       prev_accepted_legal = 1;
       prev_data_known     = data_known;
@@ -1297,17 +999,151 @@ class bmu_subscriber extends uvm_subscriber #(bmu_seq_item);
         prev_a = t.a_in;
         prev_b = t.b_in;
       end
-
     end
     else begin
-
       prev_accepted_legal = 0;
       prev_data_known     = 0;
       prev_op             = COV_OP_NONE;
-
     end
 
   endfunction
 
+  // ==========================================================================
+  // COVERAGE REPORT
+  // Style follows the simple UVM report_phase approach from the reference
+  // subscriber, while preserving all existing spec-driven covergroups.
+  // ==========================================================================
+
+  virtual function void report_phase(uvm_phase phase);
+    real functional_group_average;
+
+    super.report_phase(phase);
+
+    functional_group_average = (
+        cg_operation.get_coverage()
+      + cg_logic.get_coverage()
+      + cg_shift.get_coverage()
+      + cg_sra_sign.get_coverage()
+      + cg_binv.get_coverage()
+      + cg_compare.get_coverage()
+      + cg_shift_data.get_coverage()
+      + cg_sub.get_coverage()
+      + cg_sh2add.get_coverage()
+      + cg_ctz.get_coverage()
+      + cg_cpop_count.get_coverage()
+      + cg_cpop_region.get_coverage()
+      + cg_sext_b.get_coverage()
+      + cg_pack.get_coverage()
+      + cg_grev.get_coverage()
+      + cg_csr_source.get_coverage()
+      + cg_csr_data.get_coverage()
+      + cg_error_reason.get_coverage()
+      + cg_error_valid.get_coverage()
+    ) / 19.0;
+
+    `uvm_info(get_type_name(),
+      "============================================================",
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      "=== BMU FUNCTIONAL COVERAGE REPORT ===",
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("Operation Coverage      : %.2f%%", cg_operation.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("Logic Coverage          : %.2f%%", cg_logic.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("Shift Amount Coverage   : %.2f%%", cg_shift.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("SRA Sign Coverage       : %.2f%%", cg_sra_sign.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("Shift Data Coverage     : %.2f%%", cg_shift_data.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("BINV Coverage           : %.2f%%", cg_binv.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("Compare Coverage        : %.2f%%", cg_compare.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("SUB Coverage            : %.2f%%", cg_sub.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("SH2ADD Coverage         : %.2f%%", cg_sh2add.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("CTZ Coverage            : %.2f%%", cg_ctz.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("CPOP Count Coverage     : %.2f%%", cg_cpop_count.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("CPOP Region Coverage    : %.2f%%", cg_cpop_region.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("SEXT.B Coverage         : %.2f%%", cg_sext_b.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("PACK Coverage           : %.2f%%", cg_pack.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("GREV Coverage           : %.2f%%", cg_grev.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("CSR Source Coverage     : %.2f%%", cg_csr_source.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("CSR Data Coverage       : %.2f%%", cg_csr_data.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("Error Reason Coverage   : %.2f%%", cg_error_reason.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf("Error vs Valid Coverage : %.2f%%", cg_error_valid.get_coverage()),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      $sformatf(
+        "Functional Group Average : %.2f%% (informational only)",
+        functional_group_average
+      ),
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      "NOTE: Functional coverage is separate from Xcelium code coverage.",
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      "=== END BMU FUNCTIONAL COVERAGE REPORT ===",
+      UVM_LOW)
+
+    `uvm_info(get_type_name(),
+      "============================================================",
+      UVM_LOW)
+
+  endfunction
 
 endclass : bmu_subscriber
